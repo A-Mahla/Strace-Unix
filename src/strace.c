@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/14 01:35:35 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/16 02:54:38 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/16 16:37:50 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,51 +14,48 @@
 # include "strace.h"
 
 
-void	child(char *filename, char **av, char **envp)
+int8_t	child(char *filename, char **av, char **envp)
 {
-	ptrace(PTRACE_TRACEME, 0, NULL, NULL);
 	execve(filename, av, envp);
 	free(filename);
-	printf("strace: %s: %s\n", av[0], strerror(errno));
+	printf("strace: exec: %s\n", strerror(errno));
 	exit(1);
 }
 
 
-int8_t	strace(char **av, char **envp)
+static void	strace(char **av, char **envp)
 {
-	char		*filename;
-	struct stat	statbuf;
-	pid_t		pid;
+	char	*filename;
+	uint8_t	class;
+	pid_t	pid;
 
 	filename = path_finding(*av, envp);
 	if (!filename)
 		goto err;
-	if (stat(filename, &statbuf) < 0) {
-		printf("strace: Can't stat '%s': %s\n", av[0], strerror(errno));
-		return FAILURE;
-	}
+	class = arch(filename, *av);
 	if ((pid = fork()) < 0)
 		goto err;
 	if (pid == 0) {
 		child(filename, av, envp);
 	} else {
-		if (process(pid) == FAILURE)
-			return FAILURE;
+		if (process(pid, class) == FAILURE)
+			goto err;
 	}
-	return SUCCESS;
+	free(filename);
+	return;
 err:
+	if (filename)
+		free(filename);
 	printf("strace: %s: %s\n", av[0], strerror(errno));
-	return FAILURE;
+	exit(1);
 }
 
 
 int	main(int ac, char **av, char **envp)
 {
-	if (ac == 1) {
+	if (ac == 1)
 		printf("strace: must have PROG [ARGS]");
-	} else {
-		if (strace(av + 1, envp) == FAILURE)
-			return 1;
-	}
+	else
+		strace(av + 1, envp);
 	return 0;
 }

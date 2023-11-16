@@ -6,7 +6,7 @@
 #    By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+       #
 #                                              +#+    +#+   +#+     +#+        #
 #    Created: 2023/10/17 02:01:51 by amahla  #+#      #+#  #+#     #+#         #
-#    Updated: 2023/11/16 01:57:19 by amahla ###       ########     ########    #
+#    Updated: 2023/11/16 15:41:21 by amahla ###       ########     ########    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,6 +20,7 @@ OUTDIR 	:=	obj
 SRCDIR	:=	src
 SRC		:=	$(addprefix $(SRCDIR)/,	strace.c	\
 									process.c	\
+									arch.c		\
 									path.c		\
 									split.c		\
 									)

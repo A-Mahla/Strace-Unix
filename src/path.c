@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                    :::       :::     :::   */
-/*   child.c                                         :+:       :+: :+: :+:    */
+/*   path.c                                          :+:       :+: :+: :+:    */
 /*                                                 +:++:+     +:+  +  +:+     */
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/14 02:01:41 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/16 01:55:40 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/16 15:58:59 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ char	*path_finding(const char *filename, char **envp)
 		free(new_name);
 		new_name = NULL;
 	}
-	free(path);
+	free_split(path);
 	if (!new_name)
 		goto exit_without_path;
 	return new_name;

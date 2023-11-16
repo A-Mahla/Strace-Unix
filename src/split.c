@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                    :::       :::     :::   */
-/*   utils.c                                         :+:       :+: :+: :+:    */
+/*   split.c                                         :+:       :+: :+: :+:    */
 /*                                                 +:++:+     +:+  +  +:+     */
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/14 02:14:31 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/14 02:18:01 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/16 15:58:15 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,12 @@
 # include "strace.h"
 
 
-static void	free_array(char **split, int y)
+void	free_split(char **split)
 {
 	int	i;
 
 	i = 0;
-	while (i < y)
+	while (split[i])
 		free(split[i++]);
 	free(split);
 }
@@ -96,7 +96,7 @@ char	**split(char const *s, char c)
 		strs[y] = calloc((slen_wd(s + i, c) + 1), sizeof(char));
 		if (!strs[y])
 		{
-			free_array(strs, y);
+			free_split(strs);
 			return (NULL);
 		}
 		while (*(s + i) && *(s + i) != c)
