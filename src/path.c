@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                    :::       :::     :::   */
-/*   path.c                                          :+:       :+: :+: :+:    */
+/*   child.c                                         :+:       :+: :+: :+:    */
 /*                                                 +:++:+     +:+  +  +:+     */
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/14 02:01:41 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/14 03:45:46 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/16 01:55:40 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # include "strace.h"
 
 
-char	*concat_file(const char *prefix, const char *filename)
+static char	*concat_file(const char *prefix, const char *filename)
 {
 	char *new_name = NULL;
 
@@ -28,7 +28,7 @@ char	*concat_file(const char *prefix, const char *filename)
 }
 
 
-int8_t	get_env(char ***path, char **pwd, char **envp)
+static int8_t	get_env(char ***path, char **pwd, char **envp)
 {
 	for (size_t i = 0; envp[i]; i++) {
 		if (strstr(envp[i], "PATH=") == envp[i]) {
@@ -37,8 +37,7 @@ int8_t	get_env(char ***path, char **pwd, char **envp)
 			*path = split(envp[i] + 5, ':');
 			if (!*path)
 				break;
-		}
-		else if (strstr(envp[i], "PWD=") == envp[i]) {
+		} else if (strstr(envp[i], "PWD=") == envp[i]) {
 			*pwd = envp[i] + 4;
 		}
 	}
@@ -58,13 +57,8 @@ char	*path_finding(const char *filename, char **envp)
 		return strdup(filename);
 	if (get_env(&path, &pwd, envp) == FAILURE)
 		return NULL;
-	if (!path) {
-		if (pwd) {
-			return concat_file(pwd, filename);
-		}
-		else
-			return strdup(filename);
-	}
+	if (!path)
+		goto exit_without_path;
 	for (size_t i = 0; path[i]; i++) {
 		if ((new_name = concat_file(path[i], filename)) == NULL)
 			goto err_free_null;
@@ -74,10 +68,14 @@ char	*path_finding(const char *filename, char **envp)
 		new_name = NULL;
 	}
 	free(path);
-	if (!new_name && pwd)
-		return concat_file(pwd, filename);
+	if (!new_name)
+		goto exit_without_path;
 	return new_name;
 err_free_null:
 	free(path);
 	return NULL;
+exit_without_path:
+	if (pwd)
+		return concat_file(pwd, filename);
+	return strdup(filename);
 }
