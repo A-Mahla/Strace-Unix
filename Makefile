@@ -6,7 +6,7 @@
 #    By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+       #
 #                                              +#+    +#+   +#+     +#+        #
 #    Created: 2023/10/17 02:01:51 by amahla  #+#      #+#  #+#     #+#         #
-#    Updated: 2023/11/16 15:41:21 by amahla ###       ########     ########    #
+#    Updated: 2023/11/17 00:01:56 by amahla ###       ########     ########    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,11 +18,12 @@ DFLAGS	:=	-MMD -MP
 INC		:=	-I inc
 OUTDIR 	:=	obj
 SRCDIR	:=	src
-SRC		:=	$(addprefix $(SRCDIR)/,	strace.c	\
-									process.c	\
-									arch.c		\
-									path.c		\
-									split.c		\
+SRC		:=	$(addprefix $(SRCDIR)/,	strace.c		\
+									process.c		\
+									print_syscall.c	\
+									arch.c			\
+									path.c			\
+									split.c			\
 									)
 OBJ		:=	$(SRC:.c=.o)
 DEP 	:=	$(SRC:.c=.d)

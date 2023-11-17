@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/14 01:35:35 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/16 16:37:50 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/16 23:41:37 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,14 +39,15 @@ static void	strace(char **av, char **envp)
 		child(filename, av, envp);
 	} else {
 		if (process(pid, class) == FAILURE)
-			goto err;
+			goto exit_err;
 	}
 	free(filename);
 	return;
 err:
+	printf("strace: %s: %s\n", av[0], strerror(errno));
+exit_err:
 	if (filename)
 		free(filename);
-	printf("strace: %s: %s\n", av[0], strerror(errno));
 	exit(1);
 }
 
@@ -54,7 +55,7 @@ err:
 int	main(int ac, char **av, char **envp)
 {
 	if (ac == 1)
-		printf("strace: must have PROG [ARGS]");
+		printf("strace: must have PROG [ARGS]\n");
 	else
 		strace(av + 1, envp);
 	return 0;
