@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 01:37:20 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/17 02:08:24 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/17 16:49:01 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,7 +121,7 @@ static int8_t	loop32(pid_t child, uint8_t arch)
 int8_t	process(pid_t child, uint8_t arch)
 {
 	(void)arch;
-	if (ptrace(PTRACE_SEIZE, child, NULL, NULL, NULL) < 0) {
+	if (ptrace(PTRACE_SEIZE, child, NULL, NULL, PTRACE_O_TRACEEXEC) < 0) {
 		perror("ft_strace: ptrace PTRACE_SEIZE");
 		return FAILURE;
 	}
@@ -129,10 +129,6 @@ int8_t	process(pid_t child, uint8_t arch)
 		perror("ft_strace: ptrace PTRACE_INTERRUPT");
 		return FAILURE;
 	}
-//	if (ptrace(PTRACE_SETOPTIONS, child, NULL, PTRACE_O_TRACEEXEC) < 0)
-//		return FAILURE;
-//	if (ptrace(PTRACE_LISTEN, child, NULL, NULL, NULL) < 0)
-//		return FAILURE;
 	if (arch == ELFCLASS32) {
 		if (loop32(child, arch) == FAILURE)
 			return FAILURE;
