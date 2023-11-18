@@ -1,0 +1,179 @@
+%eax,Name,Source ,%ebx,%ecx,%edx,%esx,%edi
+1,exit,kernel/exit.c ,int,-,-,-,-
+2,fork,arch/i386/kernel/process.c ,struct pt_regs,-,-,-,-
+3,read,fs/read_write.c ,unsigned int,char *,size_t,-,-
+4,write,fs/read_write.c ,unsigned int,const char *,size_t,-,-
+5,open,fs/open.c ,const char *,int,int,-,-
+6,close,fs/open.c ,unsigned int,-,-,-,-
+7,waitpid,kernel/exit.c ,pid_t,unsigned int *,int,-,-
+8,creat,fs/open.c ,const char *,int,-,-,-
+9,link,fs/namei.c ,const char *,const char *,-,-,-
+10,unlink,fs/namei.c ,const char *,-,-,-,-
+11,execve,arch/i386/kernel/process.c ,struct pt_regs,-,-,-,-
+12,chdir,fs/open.c ,const char *,-,-,-,-
+13,time,kernel/time.c ,int *,-,-,-,-
+14,mknod,fs/namei.c ,const char *,int,dev_t,-,-
+15,chmod,fs/open.c ,const char *,mode_t,-,-,-
+16,lchown,fs/open.c ,const char *,uid_t,gid_t,-,-
+18,stat,fs/stat.c ,char *,struct __old_kernel_stat *,-,-,-
+19,lseek,fs/read_write.c ,unsigned int,off_t,unsigned int,-,-
+20,getpid,kernel/sched.c ,-,-,-,-,-
+21,mount,fs/super.c ,char *,char *,char *,-,-
+22,oldumount,fs/super.c ,char *,-,-,-,-
+23,setuid,kernel/sys.c ,uid_t,-,-,-,-
+24,getuid,kernel/sched.c ,-,-,-,-,-
+25,stime,kernel/time.c ,int *,-,-,-,-
+26,ptrace,arch/i386/kernel/ptrace.c ,long,long,long,long,-
+27,alarm,kernel/sched.c ,unsigned int,-,-,-,-
+28,fstat,fs/stat.c ,unsigned int,struct __old_kernel_stat *,-,-,-
+29,pause,arch/i386/kernel/sys_i386.c ,-,-,-,-,-
+30,utime,fs/open.c ,char *,struct utimbuf *,-,-,-
+33,access,fs/open.c ,const char *,int,-,-,-
+34,nice,kernel/sched.c ,int,-,-,-,-
+36,sync,fs/buffer.c ,-,-,-,-,-
+37,kill,kernel/signal.c ,int,int,-,-,-
+38,rename,fs/namei.c ,const char *,const char *,-,-,-
+39,mkdir,fs/namei.c ,const char *,int,-,-,-
+40,rmdir,fs/namei.c ,const char *,-,-,-,-
+41,dup,fs/fcntl.c ,unsigned int,-,-,-,-
+42,pipe,arch/i386/kernel/sys_i386.c ,unsigned long *,-,-,-,-
+43,times,kernel/sys.c ,struct tms *,-,-,-,-
+45,brk,mm/mmap.c ,unsigned long,-,-,-,-
+46,setgid,kernel/sys.c ,gid_t,-,-,-,-
+47,getgid,kernel/sched.c ,-,-,-,-,-
+48,signal,kernel/signal.c ,int,__sighandler_t,-,-,-
+49,geteuid,kernel/sched.c ,-,-,-,-,-
+50,getegid,kernel/sched.c ,-,-,-,-,-
+51,acct,kernel/acct.c ,const char *,-,-,-,-
+52,umount,fs/super.c ,char *,int,-,-,-
+54,ioctl,fs/ioctl.c ,unsigned int,unsigned int,unsigned long,-,-
+55,fcntl,fs/fcntl.c ,unsigned int,unsigned int,unsigned long,-,-
+57,setpgid,kernel/sys.c ,pid_t,pid_t,-,-,-
+59,olduname,arch/i386/kernel/sys_i386.c ,struct oldold_utsname *,-,-,-,-
+60,umask,kernel/sys.c ,int,-,-,-,-
+61,chroot,fs/open.c ,const char *,-,-,-,-
+62,ustat,fs/super.c ,dev_t,struct ustat *,-,-,-
+63,dup2,fs/fcntl.c ,unsigned int,unsigned int,-,-,-
+64,getppid,kernel/sched.c ,-,-,-,-,-
+65,getpgrp,kernel/sys.c ,-,-,-,-,-
+66,setsid,kernel/sys.c ,-,-,-,-,-
+67,sigaction,arch/i386/kernel/signal.c ,int,const struct old_sigaction *,struct old_sigaction *,-,-
+68,sgetmask,kernel/signal.c ,-,-,-,-,-
+69,ssetmask,kernel/signal.c ,int,-,-,-,-
+70,setreuid,kernel/sys.c ,uid_t,uid_t,-,-,-
+71,setregid,kernel/sys.c ,gid_t,gid_t,-,-,-
+72,sigsuspend,arch/i386/kernel/signal.c ,int,int,old_sigset_t,-,-
+73,sigpending,kernel/signal.c ,old_sigset_t *,-,-,-,-
+74,sethostname,kernel/sys.c ,char *,int,-,-,-
+75,setrlimit,kernel/sys.c ,unsigned int,struct rlimit *,-,-,-
+76,getrlimit,kernel/sys.c ,unsigned int,struct rlimit *,-,-,-
+77,getrusage,kernel/sys.c ,int,struct rusage *,-,-,-
+78,gettimeofday,kernel/time.c ,struct timeval *,struct timezone *,-,-,-
+79,settimeofday,kernel/time.c ,struct timeval *,struct timezone *,-,-,-
+80,getgroups,kernel/sys.c ,int,gid_t *,-,-,-
+81,setgroups,kernel/sys.c ,int,gid_t *,-,-,-
+82,select,arch/i386/kernel/sys_i386.c ,struct sel_arg_struct *,-,-,-,-
+83,symlink,fs/namei.c ,const char *,const char *,-,-,-
+84,lstat,fs/stat.c ,char *,struct __old_kernel_stat *,-,-,-
+85,readlink,fs/stat.c ,const char *,char *,int,-,-
+86,uselib,fs/exec.c ,const char *,-,-,-,-
+87,swapon,mm/swapfile.c ,const char *,int,-,-,-
+88,reboot,kernel/sys.c ,int,int,int,void *,-
+89,readdir,fs/readdir.c ,unsigned int,void *,unsigned int,-,-
+90,mmap,arch/i386/kernel/sys_i386.c ,struct mmap_arg_struct *,-,-,-,-
+91,munmap,mm/mmap.c ,unsigned long,size_t,-,-,-
+92,truncate,fs/open.c ,const char *,unsigned long,-,-,-
+93,ftruncate,fs/open.c ,unsigned int,unsigned long,-,-,-
+94,fchmod,fs/open.c ,unsigned int,mode_t,-,-,-
+95,fchown,fs/open.c ,unsigned int,uid_t,gid_t,-,-
+96,getpriority,kernel/sys.c ,int,int,-,-,-
+97,setpriority,kernel/sys.c ,int,int,int,-,-
+99,statfs,fs/open.c ,const char *,struct statfs *,-,-,-
+100,fstatfs,fs/open.c ,unsigned int,struct statfs *,-,-,-
+101,ioperm,arch/i386/kernel/ioport.c ,unsigned long,unsigned long,int,-,-
+102,socketcall,net/socket.c ,int,unsigned long *,-,-,-
+103,syslog,kernel/printk.c ,int,char *,int,-,-
+104,setitimer,kernel/itimer.c ,int,struct itimerval *,struct itimerval *,-,-
+105,getitimer,kernel/itimer.c ,int,struct itimerval *,-,-,-
+106,newstat,fs/stat.c ,char *,struct stat *,-,-,-
+107,newlstat,fs/stat.c ,char *,struct stat *,-,-,-
+108,newfstat,fs/stat.c ,unsigned int,struct stat *,-,-,-
+109,uname,arch/i386/kernel/sys_i386.c ,struct old_utsname *,-,-,-,-
+110,iopl,arch/i386/kernel/ioport.c ,unsigned long,-,-,-,-
+111,vhangup,fs/open.c ,-,-,-,-,-
+112,idle,arch/i386/kernel/process.c ,-,-,-,-,-
+113,vm86old,arch/i386/kernel/vm86.c ,unsigned long,struct vm86plus_struct *,-,-,-
+114,wait4,kernel/exit.c ,pid_t,unsigned long *,int options,struct rusage *,-
+115,swapoff,mm/swapfile.c ,const char *,-,-,-,-
+116,sysinfo,kernel/info.c ,struct sysinfo *,-,-,-,-
+117,ipc(*Note),arch/i386/kernel/sys_i386.c ,uint,int,int,int,void *
+118,fsync,fs/buffer.c ,unsigned int,-,-,-,-
+119,sigreturn,arch/i386/kernel/signal.c ,unsigned long,-,-,-,-
+120,clone,arch/i386/kernel/process.c ,struct pt_regs,-,-,-,-
+121,setdomainname,kernel/sys.c ,char *,int,-,-,-
+122,newuname,kernel/sys.c ,struct new_utsname *,-,-,-,-
+123,modify_ldt,arch/i386/kernel/ldt.c ,int,void *,unsigned long,-,-
+124,adjtimex,kernel/time.c ,struct timex *,-,-,-,-
+125,mprotect,mm/mprotect.c ,unsigned long,size_t,unsigned long,-,-
+126,sigprocmask,kernel/signal.c ,int,old_sigset_t *,old_sigset_t *,-,-
+127,create_module,kernel/module.c ,const char *,size_t,-,-,-
+128,init_module,kernel/module.c ,const char *,struct module *,-,-,-
+129,delete_module,kernel/module.c ,const char *,-,-,-,-
+130,get_kernel_syms,kernel/module.c ,struct kernel_sym *,-,-,-,-
+131,quotactl,fs/dquot.c ,int,const char *,int,caddr_t,-
+132,getpgid,kernel/sys.c ,pid_t,-,-,-,-
+133,fchdir,fs/open.c ,unsigned int,-,-,-,-
+134,bdflush,fs/buffer.c ,int,long,-,-,-
+135,sysfs,fs/super.c ,int,unsigned long,unsigned long,-,-
+136,personality,kernel/exec_domain.c ,unsigned long,-,-,-,-
+138,setfsuid,kernel/sys.c ,uid_t,-,-,-,-
+139,setfsgid,kernel/sys.c ,gid_t,-,-,-,-
+140,llseek,fs/read_write.c ,unsigned int,unsigned long,unsigned long,loff_t *,unsigned int
+141,getdents,fs/readdir.c ,unsigned int,void *,unsigned int,-,-
+142,select,fs/select.c ,int,fd_set *,fd_set *,fd_set *,struct timeval *
+143,flock,fs/locks.c ,unsigned int,unsigned int,-,-,-
+144,msync,mm/filemap.c ,unsigned long,size_t,int,-,-
+145,readv,fs/read_write.c ,unsigned long,const struct iovec *,unsigned long,-,-
+146,writev,fs/read_write.c ,unsigned long,const struct iovec *,unsigned long,-,-
+147,getsid,kernel/sys.c ,pid_t,-,-,-,-
+148,fdatasync,fs/buffer.c ,unsigned int,-,-,-,-
+149,sysctl,kernel/sysctl.c ,struct __sysctl_args *,-,-,-,-
+150,mlock,mm/mlock.c ,unsigned long,size_t,-,-,-
+151,munlock,mm/mlock.c ,unsigned long,size_t,-,-,-
+152,mlockall,mm/mlock.c ,int,-,-,-,-
+153,munlockall,mm/mlock.c ,-,-,-,-,-
+154,sched_setparam,kernel/sched.c ,pid_t,struct sched_param *,-,-,-
+155,sched_getparam,kernel/sched.c ,pid_t,struct sched_param *,-,-,-
+156,sched_setscheduler,kernel/sched.c ,pid_t,int,struct sched_param *,-,-
+157,sched_getscheduler,kernel/sched.c ,pid_t,-,-,-,-
+158,sched_yield,kernel/sched.c ,-,-,-,-,-
+159,sched_get_priority_max,kernel/sched.c ,int,-,-,-,-
+160,sched_get_priority_min,kernel/sched.c ,int,-,-,-,-
+161,sched_rr_get_interval,kernel/sched.c ,pid_t,struct timespec *,-,-,-
+162,nanosleep,kernel/sched.c ,struct timespec *,struct timespec *,-,-,-
+163,mremap,mm/mremap.c ,unsigned long,unsigned long,unsigned long,unsigned long,-
+164,setresuid,kernel/sys.c ,uid_t,uid_t,uid_t,-,-
+165,getresuid,kernel/sys.c ,uid_t *,uid_t *,uid_t *,-,-
+166,vm86,arch/i386/kernel/vm86.c ,struct vm86_struct *,-,-,-,-
+167,query_module,kernel/module.c ,const char *,int,char *,size_t,size_t *
+168,poll,fs/select.c ,struct pollfd *,unsigned int,long,-,-
+169,nfsservctl,fs/filesystems.c ,int,void *,void *,-,-
+170,setresgid,kernel/sys.c ,gid_t,gid_t,gid_t,-,-
+171,getresgid,kernel/sys.c ,gid_t *,gid_t *,gid_t *,-,-
+172,prctl,kernel/sys.c ,int,unsigned long,unsigned long,unsigned long,unsigned long
+173,rt_sigreturn,arch/i386/kernel/signal.c ,unsigned long,-,-,-,-
+174,rt_sigaction,kernel/signal.c ,int,const struct sigaction *,struct sigaction *,size_t,-
+175,rt_sigprocmask,kernel/signal.c ,int,sigset_t *,sigset_t *,size_t,-
+176,rt_sigpending,kernel/signal.c ,sigset_t *,size_t,-,-,-
+177,rt_sigtimedwait,kernel/signal.c ,const sigset_t *,siginfo_t *,const struct timespec *,size_t,-
+178,rt_sigqueueinfo,kernel/signal.c ,int,int,siginfo_t *,-,-
+179,rt_sigsuspend,arch/i386/kernel/signal.c ,sigset_t *,size_t,-,-,-
+180,pread,fs/read_write.c ,unsigned int,char *,size_t,loff_t,-
+181,pwrite,fs/read_write.c ,unsigned int,const char *,size_t,loff_t,-
+182,chown,fs/open.c ,const char *,uid_t,gid_t,-,-
+183,getcwd,fs/dcache.c ,char *,unsigned long,-,-,-
+184,capget,kernel/capability.c ,cap_user_header_t,cap_user_data_t,-,-,-
+185,capset,kernel/capability.c ,cap_user_header_t,const cap_user_data_t,-,-,-
+186,sigaltstack,arch/i386/kernel/signal.c ,const stack_t *,stack_t *,-,-,-
+187,sendfile,mm/filemap.c ,int,int,off_t *,size_t,-
+190,vfork,arch/i386/kernel/process.c ,struct pt_regs,-,-,-,-

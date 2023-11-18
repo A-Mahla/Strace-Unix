@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 01:37:20 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/17 16:49:01 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/17 17:47:22 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,17 +42,17 @@ static int8_t	getregset(bool is_ret, pid_t child, void *regs, uint8_t arch,
 		return FAILURE;
 	}
 	if (arch == ELFCLASS32) {
-		print_syscall(
+		print_syscall32(
 			syscall[(*(struct user_regs_struct32 *)regs).orig_eax],
 			arch,
-			(unsigned long long int)(*(struct user_regs_struct32 *)regs).eax,
+			regs,
 			is_ret
 		);
 	} else {
-		print_syscall(
+		print_syscall64(
 			syscall[(*(struct user_regs_struct64 *)regs).orig_rax],
 			arch,
-			(unsigned long long int)(*(struct user_regs_struct64 *)regs).rax,
+			regs,
 			is_ret
 		);
 	}

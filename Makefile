@@ -6,7 +6,7 @@
 #    By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+       #
 #                                              +#+    +#+   +#+     +#+        #
 #    Created: 2023/10/17 02:01:51 by amahla  #+#      #+#  #+#     #+#         #
-#    Updated: 2023/11/17 00:01:56 by amahla ###       ########     ########    #
+#    Updated: 2023/11/17 18:53:24 by amahla ###       ########     ########    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,6 +21,7 @@ SRCDIR	:=	src
 SRC		:=	$(addprefix $(SRCDIR)/,	strace.c		\
 									process.c		\
 									print_syscall.c	\
+									print_type.c	\
 									arch.c			\
 									path.c			\
 									split.c			\
