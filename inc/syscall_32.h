@@ -8,7 +8,7 @@
 	[  0] = {"no_syscall", 0, {0, 0, 0, 0, 0, 0}, 0}, \
 	[  1] = {"exit", 1, {INT, 0, 0, 0, 0, 0}, 0}, \
 	[  2] = {"fork", 0, {0, 0, 0, 0, 0, 0}, INT}, \
-	[  3] = {"read", 3, {INT, PTR, INT, 0, 0, 0}, INT}, \
+	[  3] = {"read", 3, {INT, STR, INT, 0, 0, 0}, INT}, \
 	[  4] = {"write", 3, {INT, STR, INT, 0, 0, 0}, INT}, \
 	[  5] = {"open", 3, {STR, FLAG_OPEN, MODE, 0, 0, 0}, INT}, \
 	[  6] = {"close", 1, {INT, 0, 0, 0, 0, 0}, INT}, \
@@ -47,7 +47,7 @@
 	[ 39] = {"mkdir", 2, {STR, MODE, 0, 0, 0, 0}, INT}, \
 	[ 40] = {"rmdir", 1, {STR, 0, 0, 0, 0, 0}, INT}, \
 	[ 41] = {"dup", 1, {ULONG, 0, 0, 0, 0, 0}, INT}, \
-	[ 42] = {"pipe", 1, {ULONG, 0, 0, 0, 0, 0}, INT}, \
+	[ 42] = {"pipe", 1, {PIPE, 0, 0, 0, 0, 0}, INT}, \
 	[ 43] = {"times", 1, {PTR, 0, 0, 0, 0, 0}, ULONG}, \
 	[ 44] = {"prof", 0, {0, 0, 0, 0, 0, 0}, INT}, \
 	[ 45] = {"brk", 1, {ULONG, 0, 0, 0, 0, 0}, INT}, \
@@ -95,7 +95,7 @@
 	[ 87] = {"swapon", 2, {STR, INT, 0, 0, 0, 0}, INT}, \
 	[ 88] = {"reboot", 4, {INT, INT, INT, PTR, 0, 0}, INT}, \
 	[ 89] = {"readdir", 3, {ULONG, PTR, ULONG, 0, 0, 0}, INT}, \
-	[ 90] = {"mmap", 6, {PTR, ULONG, ULONG, ULONG, ULONG, ULONG}, PTR}, \
+	[ 90] = {"mmap", 6, {PTR, ULONG, ULONG, ULONG, ULONG, OFF}, PTR}, \
 	[ 91] = {"munmap", 2, {ULONG, ULONG, 0, 0, 0, 0}, INT}, \
 	[ 92] = {"truncate", 2, {STR, ULONG, 0, 0, 0, 0}, INT}, \
 	[ 93] = {"ftruncate", 2, {ULONG, ULONG, 0, 0, 0, 0}, INT}, \
@@ -185,8 +185,8 @@
 	[177] = {"rt_sigtimedwait", 4, {STRUCT_SIGSET, STRUCT_SIGINF, STRUCT_TIMESPEC, ULONG, 0, 0}, INT}, \
 	[178] = {"rt_sigqueueinfo", 3, {INT, INT, STRUCT_SIGINF, 0, 0, 0}, INT}, \
 	[179] = {"rt_sigsuspend", 2, {PTR, ULONG, 0, 0, 0, 0}, INT}, \
-	[180] = {"pread64", 4, {ULONG, STR, ULONG, ULONG, 0, 0}, INT}, \
-	[181] = {"pwrite64", 4, {ULONG, STR, ULONG, ULONG, 0, 0}, INT}, \
+	[180] = {"pread", 4, {ULONG, STR, ULONG, OFF, 0, 0}, INT}, \
+	[181] = {"pwrite", 4, {ULONG, STR, ULONG, OFF, 0, 0}, INT}, \
 	[182] = {"chown", 3, {STR, INT, INT, 0, 0, 0}, INT}, \
 	[183] = {"getcwd", 2, {STR, ULONG, 0, 0, 0, 0}, INT}, \
 	[184] = {"capget", 2, {PTR, PTR, 0, 0, 0, 0}, INT}, \

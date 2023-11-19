@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/17 18:00:59 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/18 04:26:52 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/19 03:55:18 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,51 +14,98 @@
 # include "strace.h"
 
 
-static void	print_undef(unsigned long long int value, uint8_t arch)
+static uint8_t	read_data_from_memory(pid_t child, unsigned long long int value,
+	int size, void *local_buffer)
 {
-	(void)arch;
-	(void)value;
+	int8_t				ret;
+	const struct iovec	local = {.iov_base = local_buffer, .iov_len = size};
+	const struct iovec	remote = {.iov_base = (void *)value, .iov_len = size};
+
+	if ((ret = process_vm_readv(child, &local, 1, &remote, 1, 0)) < 0) {
+		perror("ft_strace: process_vm_readv");
+		exit(1);
+	}
+	if (ret < size)
+		((char *)local_buffer)[ret] = '\0';
+	return ret;
 }
 
 
-static void	print_int(unsigned long long int value, uint8_t arch)
+static void	print_undef(pid_t child, unsigned long long int value, uint8_t arch)
 {
 	(void)arch;
+	(void)value;
+	(void)child;
+}
+
+
+static void	print_int(pid_t child, unsigned long long int value, uint8_t arch)
+{
+	(void)arch;
+	(void)child;
 	printf("%d", (int)value);
 }
 
 
-static void	print_long(unsigned long long int value, uint8_t arch)
+static void	print_long(pid_t child, unsigned long long int value, uint8_t arch)
 {
 	(void)arch;
+	(void)child;
 	printf("%ld", (long int)value);
 }
 
 
-static void	print_ulong(unsigned long long int value, uint8_t arch)
+static void	print_ulong(pid_t child, unsigned long long int value, uint8_t arch)
 {
 	(void)arch;
+	(void)child;
 	printf("%lld", (unsigned long long int)value);
 }
 
 
-static void	print_ptr(unsigned long long int value, uint8_t arch)
+static void	print_ptr(pid_t child, unsigned long long int value, uint8_t arch)
 {
 	(void)arch;
-	printf("%#lx", (uintptr_t)value);
+	(void)child;
+	if (value == 0)
+		printf("NULL");
+	else
+		printf("%#lx", (uintptr_t)value);
 }
 
 
-static void	print_str(unsigned long long int value, uint8_t arch)
+static void	print_str(pid_t child, unsigned long long int value, uint8_t arch)
 {
+	char	buffer[BUFFER_SIZE] = {0};
+	int8_t	i = 0;
+	int8_t	size;
+
 	(void)arch;
-	printf("%s", (char *)&value);
+	(void)child;
+	(void)value;
+	if (value == 0) {
+		printf("NULL");
+	} else {
+		size = read_data_from_memory(child, value, BUFFER_SIZE, buffer);
+		printf("\"");
+		while ((isprint(*buffer) && buffer[i] && i < size)
+			|| (!isprint(*buffer) && i < size)
+		) {
+			if (isprint(buffer[i]))
+				printf("%c", buffer[i]);
+			else
+				printf("\\%hho", buffer[i]);
+			i++;
+		}
+		printf("\"");
+		if (i == BUFFER_SIZE)
+			printf("...");
+	}
 }
 
 
-static void	print_flag_open(unsigned long long int value, uint8_t arch)
+static void	print_flag_open(pid_t child, unsigned long long int value, uint8_t arch)
 {
-	(void)arch;
 	static const struct type_flag	flags[] = {
 		[ 0] = {.flag = O_RDONLY, .name = "O_RDONLY"},
 		[ 1] = {.flag = O_WRONLY, .name = "O_WRONLY"},
@@ -79,9 +126,11 @@ static void	print_flag_open(unsigned long long int value, uint8_t arch)
 	};
 	bool first = true;
 
+	(void)arch;
+	(void)child;
 	for (long unsigned int i = 0; i < sizeof(flags) / sizeof(flags[0]); i++)
 	{
-		if (value & flags[i].flag)
+		if ((int)value & flags[i].flag)
 		{
 			if (!first)
 				printf("|");
@@ -94,9 +143,8 @@ static void	print_flag_open(unsigned long long int value, uint8_t arch)
 }
 
 
-static void	print_prot_mmap(unsigned long long int value, uint8_t arch)
+static void	print_prot_mmap(pid_t child, unsigned long long int value, uint8_t arch)
 {
-	(void)arch;
 	static const struct type_flag	flags[] = {
 		[0] = {.flag = PROT_READ, .name = "PROT_READ"},
 		[1] = {.flag = PROT_WRITE, .name = "PROT_WRITE"},
@@ -107,9 +155,11 @@ static void	print_prot_mmap(unsigned long long int value, uint8_t arch)
 	};
 	bool first = true;
 
+	(void)arch;
+	(void)child;
 	for (long unsigned int i = 0; i < sizeof(flags) / sizeof(flags[0]); i++)
 	{
-		if (value & flags[i].flag)
+		if ((int)value & flags[i].flag)
 		{
 			if (!first)
 				printf("|");
@@ -122,9 +172,8 @@ static void	print_prot_mmap(unsigned long long int value, uint8_t arch)
 }
 
 
-static void	print_flag_mmap(unsigned long long int value, uint8_t arch)
+static void	print_flag_mmap(pid_t child, unsigned long long int value, uint8_t arch)
 {
-	(void)arch;
 	static const struct type_flag	flags[] = {
 		[ 0] = {.flag = MAP_SHARED, .name = "MAP_SHARED"},
 		[ 1] = {.flag = MAP_PRIVATE, .name = "MAP_PRIVATE"},
@@ -143,11 +192,12 @@ static void	print_flag_mmap(unsigned long long int value, uint8_t arch)
 		[14] = {.flag = MAP_FIXED_NOREPLACE, .name = "MAP_FIXED_NOREPLACE"},
 	};
 	bool first = true;
-//	(void)value;
 
+	(void)arch;
+	(void)child;
 	for (long unsigned int i = 0; i < sizeof(flags) / sizeof(flags[0]); i++)
 	{
-		if (value & flags[i].flag)
+		if ((int)value & flags[i].flag)
 		{
 			if (!first)
 				printf("|");
@@ -155,28 +205,81 @@ static void	print_flag_mmap(unsigned long long int value, uint8_t arch)
 				first = false;
 			printf("%s", flags[i].name);
 		}
-//		printf("\n%s => %lld", flags[i].name, flags[i].flag);
 	}
-//	printf("\n%s => %d", "value", (int)value);
-//	printf("\n");
 }
 
 
-void	print_type(enum type_e flag, unsigned long long int value, uint8_t arch)
+static void	print_dirfd(pid_t child, unsigned long long int value, uint8_t arch)
 {
-	static void (*f[])(unsigned long long int, uint8_t) = {
+	static const struct type_flag	flags[] = {
+		[0] = {.flag = AT_FDCWD, .name = "AT_FDCWD"},
+//		[1] = {.flag = AT_SYMLINK_NOFOLLOW, .name = "AT_SYMLINK_NOFOLLOW"},
+//		[2] = {.flag = AT_REMOVEDIR, .name = "AT_REMOVEDIR"},
+//		[3] = {.flag = AT_SYMLINK_FOLLOW, .name = "AT_SYMLINK_FOLLOW"},
+//		[4] = {.flag = AT_EACCESS, .name = "AT_EACCESS"},
+	};
+	bool first = true;
+	int new_value = (int)value;
+
+	(void)arch;
+	(void)child;
+	for (long unsigned int i = 0; i < sizeof(flags) / sizeof(flags[0]); i++)
+	{
+		if ( new_value & flags[i].flag)
+		{
+			if (!first)
+				printf("|");
+			else
+				first = false;
+			printf("%s", flags[i].name);
+		}
+	}
+	if (first)
+		printf("%d", (int)value);
+}
+
+
+static void	print_pipe(pid_t child, unsigned long long int value, uint8_t arch)
+{
+	int	buffer[2];
+	// 255
+	// 65280 = 255 << 8
+	// 16711680 = 255 << 16
+	// 4278190080 = 255 << 24
+
+	(void)child;
+	(void)arch;
+	read_data_from_memory(child, value, 2 * sizeof(int), buffer);
+	printf("[%d, %d]", buffer[0], buffer[1]);
+}
+
+
+static void	print_offset(pid_t child, unsigned long long int value, uint8_t arch)
+{
+	(void)arch;
+	(void)child;
+	printf("%#lx", (uintptr_t)value);
+}
+
+
+void	print_type(enum type_e flag, pid_t child, unsigned long long int value, uint8_t arch)
+{
+	static void (*f[])(pid_t, unsigned long long int, uint8_t) = {
 		[UNDEF] = print_undef,
 		[INT] = print_int,
 		[LONG] = print_long,
 		[ULONG] = print_ulong,
 		[PTR] = print_ptr,
 		[STR] = print_str,
+		[CONST_STR] = print_str,
 		[FLAG_OPEN] = print_flag_open,
 		[FLAG_OPENAT] = print_flag_open,
 		[FLAG_PROT] = print_prot_mmap,
 		[FLAG_MMAP] = print_flag_mmap,
+		[OFF] = print_offset, 
+		[DIRFD] = print_dirfd, 
+		[PIPE] = print_pipe,
 	};
-//		[PIPE] // Special types
 //		[SV]
 //		[KEY]
 //		[MODE]
@@ -249,7 +352,7 @@ void	print_type(enum type_e flag, unsigned long long int value, uint8_t arch)
 //	if ((arch ==  ELFCLASS32 && flag < NB_SYSCALL_32)
 //			|| (arch ==  ELFCLASS64 && flag < NB_SYSCALL_64))
 //		f[flag](value, arch);
-	if ((arch ==  ELFCLASS32 && flag < PIPE)
-			|| (arch ==  ELFCLASS64 && flag < PIPE))
-		f[flag](value, arch);
+	if ((arch ==  ELFCLASS32 && flag < SV)
+			|| (arch ==  ELFCLASS64 && flag < SV))
+		f[flag](child, value, arch);
 }

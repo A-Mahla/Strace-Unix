@@ -4,16 +4,6 @@
 # include "syscall_64.h"
 # include "syscall_32.h"
 
-//# define MODE_64BITS		0
-//# define MODE_32BITS		1
-
-
-struct errno_t
-{
-	const char	*name;
-	const char	*info;
-};
-
 
 struct user_regs_struct64
 {
@@ -83,10 +73,13 @@ enum type_e
 	ULONG,
 	PTR,
 	STR,
+	CONST_STR,
 	FLAG_OPEN, // FLag types
 	FLAG_OPENAT,
 	FLAG_PROT,
 	FLAG_MMAP,
+	OFF,
+	DIRFD,
 	PIPE, // Special types
 	SV,
 	KEY,
@@ -166,8 +159,6 @@ struct syscall_s
 	enum type_e		type_args[6];
 	enum type_e		type_ret;
 };
-
-
 
 
 #endif

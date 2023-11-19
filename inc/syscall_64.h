@@ -5,7 +5,7 @@
 
 
 # define SYSCALL_64 { \
-	[  0] = {"read", 3, {INT, PTR, INT, 0, 0, 0}, INT}, \
+	[  0] = {"read", 3, {INT, STR, INT, 0, 0, 0}, INT}, \
 	[  1] = {"write", 3, {INT, STR, INT, 0, 0, 0}, INT}, \
 	[  2] = {"open", 3, {STR, FLAG_OPEN, 0, 0, 0, 0}, INT}, \
 	[  3] = {"close", 1, {INT, 0, 0, 0, 0, 0}, INT}, \
@@ -13,8 +13,8 @@
 	[  5] = {"fstat", 2, {INT, STRUCT_STAT, 0, 0, 0, 0}, INT}, \
 	[  6] = {"lstat", 2, {STR, STRUCT_STAT, 0, 0, 0, 0}, INT}, \
 	[  7] = {"poll", 3, {STRUCT_POLL, ULONG, INT, 0, 0, 0}, INT}, \
-	[  8] = {"lseek", 3, {INT, PTR, INT, 0, 0, 0}, PTR}, \
-	[  9] = {"mmap", 6, {PTR, ULONG, FLAG_PROT, FLAG_MMAP, INT, PTR}, PTR}, \
+	[  8] = {"lseek", 3, {INT, OFF, INT, 0, 0, 0}, PTR}, \
+	[  9] = {"mmap", 6, {PTR, ULONG, FLAG_PROT, FLAG_MMAP, INT, OFF}, PTR}, \
 	[ 10] = {"mprotect", 3, {PTR, ULONG, INT, 0, 0, 0}, INT}, \
 	[ 11] = {"munmap", 2, {PTR, ULONG, 0, 0, 0, 0}, INT}, \
 	[ 12] = {"brk", 1, {PTR, 0, 0, 0, 0, 0}, PTR}, \
@@ -22,8 +22,8 @@
 	[ 14] = {"rt_sigprocmask", 4, {INT, STRUCT_SIGSET, STRUCT_SIGSET, 0, 0, 0}, INT}, \
 	[ 15] = {"rt_sigreturn", 0, {0, 0, 0, 0, 0, 0}, INT}, \
 	[ 16] = {"ioctl", 3, {INT, ULONG, 0, 0, 0, 0}, INT}, \
-	[ 17] = {"pread64", 4, {INT, PTR, ULONG, PTR, 0, 0}, ULONG}, \
-	[ 18] = {"pwrite64", 4, {INT, PTR, ULONG, PTR, 0, 0}, ULONG}, \
+	[ 17] = {"pread64", 4, {INT, STR, ULONG, OFF, 0, 0}, ULONG}, \
+	[ 18] = {"pwrite64", 4, {INT, STR, ULONG, OFF, 0, 0}, ULONG}, \
 	[ 19] = {"readv", 3, {INT, STRUCT_IOVEC, INT, 0, 0, 0}, ULONG}, \
 	[ 20] = {"writev", 3, {INT, STRUCT_IOVEC, INT, 0, 0, 0}, ULONG}, \
 	[ 21] = {"access", 2, {STR, INT, 0, 0, 0, 0}, INT}, \
@@ -49,8 +49,8 @@
 	[ 41] = {"socket", 3, {INT, INT, INT, 0, 0, 0}, INT}, \
 	[ 42] = {"connect", 3, {INT, STRUCT_SOCKADDR, ULONG, 0, 0, 0}, INT}, \
 	[ 43] = {"accept", 3, {INT, STRUCT_SOCKADDR, ULONG, 0, 0, 0}, INT}, \
-	[ 44] = {"sendto", 6, {INT, PTR, ULONG, INT, STRUCT_SOCKADDR, ULONG}, ULONG}, \
-	[ 45] = {"recvfrom", 6, {INT, PTR, ULONG, INT, STRUCT_SOCKADDR, ULONG}, ULONG}, \
+	[ 44] = {"sendto", 6, {INT, STR, ULONG, INT, STRUCT_SOCKADDR, ULONG}, ULONG}, \
+	[ 45] = {"recvfrom", 6, {INT, STR, ULONG, INT, STRUCT_SOCKADDR, ULONG}, ULONG}, \
 	[ 46] = {"sendmsg", 3, {INT, STRUCT_MSGHDR, INT, 0, 0, 0}, ULONG}, \
 	[ 47] = {"recvmsg", 3, {INT, STRUCT_MSGHDR, INT, 0, 0, 0}, ULONG}, \
 	[ 48] = {"shutdown", 2, {INT, INT, 0, 0, 0, 0}, INT}, \
@@ -192,7 +192,7 @@
 	[184] = {"tuxcall", 0, {0, 0, 0, 0, 0, 0}, INT}, \
 	[185] = {"security", 0, {0, 0, 0, 0, 0, 0}, INT}, \
 	[186] = {"gettid", 0, {0, 0, 0, 0, 0, 0}, INT}, \
-	[187] = {"readahead", 3, {INT, INT, ULONG, 0, 0, 0}, LONG}, \
+	[187] = {"readahead", 3, {INT, OFF, ULONG, 0, 0, 0}, LONG}, \
 	[188] = {"setxattr", 5, {STR, STR, PTR, ULONG, INT, 0}, INT}, \
 	[189] = {"lsetxattr", 5, {STR, STR, PTR, ULONG, INT, 0}, INT}, \
 	[190] = {"fsetxattr", 5, {INT, STR, PTR, ULONG, INT, 0}, INT}, \
@@ -226,7 +226,7 @@
 	[218] = {"set_tid_address", 1, {INT, 0, 0, 0, 0, 0}, LONG}, \
 	[219] = {"restart_syscall", 0, {0, 0, 0, 0, 0, 0}, INT}, \
 	[220] = {"semtimedop", 4, {INT, STRUCT_SEMBUF, ULONG, STRUCT_TIMESPEC, 0, 0}, INT}, \
-	[221] = {"fadvise64", 4, {INT, ULONG, ULONG, INT, 0, 0}, INT}, \
+	[221] = {"fadvise64", 4, {INT, OFF, ULONG, INT, 0, 0}, INT}, \
 	[222] = {"timer_create", 3, {INT, STRUCT_SIGEVENT, PTR, 0, 0, 0}, INT}, \
 	[223] = {"timer_settime", 4, {INT, INT, STRUCT_ITIMERSPEC, STRUCT_ITIMERSPEC, 0, 0}, INT}, \
 	[224] = {"timer_gettime", 2, {INT, STRUCT_ITIMERSPEC, 0, 0, 0, 0}, INT}, \
@@ -262,19 +262,19 @@
 	[254] = {"inotify_add_watch", 3, {INT, STR, ULONG, 0, 0, 0}, INT}, \
 	[255] = {"inotify_rm_watch", 2, {INT, INT, 0, 0, 0, 0}, INT}, \
 	[256] = {"migrate_pages", 4, {INT, ULONG, PTR, PTR, 0, 0}, LONG}, \
-	[257] = {"openat", 3, {INT, STR, INT, 0, 0, 0}, INT}, \
-	[258] = {"mkdirat", 3, {INT, STR, MODE, 0, 0, 0}, INT}, \
-	[259] = {"mknodat", 4, {INT, STR, MODE, ULONG, 0, 0}, INT}, \
-	[260] = {"fchownat", 5, {INT, STR, INT, INT, INT, 0}, INT}, \
-	[261] = {"futimesat", 3, {INT, STR, STRUCT_TIMEVAL, 0, 0, 0}, INT}, \
-	[262] = {"newfstatat", 4, {INT, STR, STRUCT_STAT, INT, 0, 0}, INT}, \
-	[263] = {"unlinkat", 3, {INT, STR, INT, 0, 0, 0}, INT}, \
-	[264] = {"renameat", 4, {INT, STR, INT, STR, 0, 0}, INT}, \
-	[265] = {"linkat", 5, {INT, STR, INT, STR, INT, 0}, INT}, \
-	[266] = {"symlinkat", 3, {STR, INT, STR, 0, 0, 0}, INT}, \
-	[267] = {"readlinkat", 4, {INT, STR, STR, ULONG, 0, 0}, INT}, \
-	[268] = {"fchmodat", 3, {INT, STR, MODE, 0, 0, 0}, INT}, \
-	[269] = {"faccessat", 3, {INT, STR, INT, 0, 0, 0}, INT}, \
+	[257] = {"openat", 3, {DIRFD, STR, INT, 0, 0, 0}, INT}, \
+	[258] = {"mkdirat", 3, {DIRFD, STR, MODE, 0, 0, 0}, INT}, \
+	[259] = {"mknodat", 4, {DIRFD, STR, MODE, ULONG, 0, 0}, INT}, \
+	[260] = {"fchownat", 5, {DIRFD, STR, INT, INT, INT, 0}, INT}, \
+	[261] = {"futimesat", 3, {DIRFD, STR, STRUCT_TIMEVAL, 0, 0, 0}, INT}, \
+	[262] = {"newfstatat", 4, {DIRFD, STR, STRUCT_STAT, INT, 0, 0}, INT}, \
+	[263] = {"unlinkat", 3, {DIRFD, STR, INT, 0, 0, 0}, INT}, \
+	[264] = {"renameat", 4, {DIRFD, STR, DIRFD, STR, 0, 0}, INT}, \
+	[265] = {"linkat", 5, {DIRFD, STR, DIRFD, STR, INT, 0}, INT}, \
+	[266] = {"symlinkat", 3, {STR, DIRFD, STR, 0, 0, 0}, INT}, \
+	[267] = {"readlinkat", 4, {DIRFD, STR, STR, ULONG, 0, 0}, INT}, \
+	[268] = {"fchmodat", 3, {DIRFD, STR, MODE, 0, 0, 0}, INT}, \
+	[269] = {"faccessat", 3, {DIRFD, STR, INT, 0, 0, 0}, INT}, \
 	[270] = {"pselect6", 6, {INT, PTR, PTR, PTR, STRUCT_TIMESPEC, PTR}, INT}, \
 	[271] = {"ppoll", 5, {STRUCT_POLLFD, ULONG, STRUCT_TIMESPEC, STRUCT_SIGSET, ULONG, 0}, INT}, \
 	[272] = {"unshare", 1, {INT, 0, 0, 0, 0, 0}, INT}, \
@@ -282,15 +282,15 @@
 	[274] = {"get_robust_list", 3, {INT, STRUCT_ROBUST_LIST_HEAD, ULONG, 0, 0, 0}, LONG}, \
 	[275] = {"splice", 6, {INT, PTR, INT, PTR, ULONG, ULONG}, LONG}, \
 	[276] = {"tee", 4, {INT, INT, ULONG, ULONG, 0, 0}, LONG}, \
-	[277] = {"sync_file_range", 4, {INT, ULONG, ULONG, ULONG, 0, 0}, LONG}, \
+	[277] = {"sync_file_range", 4, {INT, OFF, ULONG, ULONG, 0, 0}, LONG}, \
 	[278] = {"vmsplice", 4, {INT, STRUCT_IOVEC, ULONG, ULONG, 0, 0}, LONG}, \
 	[279] = {"move_pages", 6, {INT, ULONG, PTR, INT, INT, INT}, LONG}, \
-	[280] = {"utimensat", 4, {INT, STR, STRUCT_TIMESPEC, INT, 0, 0}, INT}, \
+	[280] = {"utimensat", 4, {DIRFD, STR, STRUCT_TIMESPEC, INT, 0, 0}, INT}, \
 	[281] = {"epoll_pwait", 6, {INT, STRUCT_EPOLL_EVENT, INT, INT, STRUCT_SIGSET, ULONG}, INT}, \
 	[282] = {"signalfd", 3, {INT, PTR, INT, 0, 0, 0}, INT}, \
 	[283] = {"timerfd_create", 2, {INT, INT, 0, 0, 0, 0}, INT}, \
 	[284] = {"eventfd", 1, {INT, 0, 0, 0, 0, 0}, INT}, \
-	[285] = {"fallocate", 4, {INT, INT, ULONG, ULONG, 0, 0}, INT}, \
+	[285] = {"fallocate", 4, {INT, INT, OFF, ULONG, 0, 0}, INT}, \
 	[286] = {"timerfd_settime", 4, {INT, INT, STRUCT_ITIMERSPEC, STRUCT_ITIMERSPEC, 0, 0}, INT}, \
 	[287] = {"timerfd_gettime", 2, {INT, STRUCT_ITIMERSPEC, 0, 0, 0, 0}, INT}, \
 	[288] = {"accept4", 4, {INT, STRUCT_SOCKADDR, ULONG, INT, 0, 0}, INT}, \
@@ -298,7 +298,7 @@
 	[290] = {"eventfd2", 2, {INT, INT, 0, 0, 0, 0}, INT}, \
 	[291] = {"epoll_create1", 1, {INT, 0, 0, 0, 0, 0}, INT}, \
 	[292] = {"dup3", 3, {INT, INT, INT, 0, 0, 0}, INT}, \
-	[293] = {"pipe2", 2, {INT, INT, 0, 0, 0, 0}, INT}, \
+	[293] = {"pipe2", 2, {PIPE, INT, 0, 0, 0, 0}, INT}, \
 	[294] = {"inotify_init1", 1, {INT, 0, 0, 0, 0, 0}, INT}, \
 	[295] = {"preadv", 4, {INT, STRUCT_IOVEC, ULONG, ULONG, 0, 0}, LONG}, \
 	[296] = {"pwritev", 4, {INT, STRUCT_IOVEC, ULONG, ULONG, 0, 0}, LONG}, \
@@ -308,8 +308,8 @@
 	[300] = {"fanotify_init", 2, {ULONG, ULONG, 0, 0, 0, 0}, INT}, \
 	[301] = {"fanotify_mark", 5, {INT, ULONG, ULONG, INT, STR, 0}, INT}, \
 	[302] = {"prlimit64", 4, {INT, INT, STRUCT_RLIMIT, STRUCT_RLIMIT, 0, 0}, INT}, \
-	[303] = {"name_to_handle_at", 5, {INT, STR, STRUCT_FILE_HANDLE, INT, INT, 0}, INT}, \
-	[304] = {"open_by_handle_at", 3, {INT, STRUCT_FILE_HANDLE, INT, 0, 0, 0}, INT}, \
+	[303] = {"name_to_handle_at", 5, {DIRFD, STR, STRUCT_FILE_HANDLE, INT, INT, 0}, INT}, \
+	[304] = {"open_by_handle_at", 3, {DIRFD, STRUCT_FILE_HANDLE, INT, 0, 0, 0}, INT}, \
 	[305] = {"clock_adjtime", 2, {CLOCK, STRUCT_TIMEX, 0, 0, 0, 0}, INT}, \
 	[306] = {"syncfs", 1, {INT, 0, 0, 0, 0, 0}, INT}, \
 	[307] = {"sendmmsg", 4, {INT, STRUCT_MMSGHDR, ULONG, ULONG, 0, 0}, INT}, \
@@ -327,7 +327,7 @@
 	[319] = {"memfd_create", 2, {STR, ULONG, 0, 0, 0, 0}, INT}, \
 	[320] = {"kexec_file_load", 5, {INT, INT, ULONG, STR, ULONG, 0}, LONG}, \
 	[321] = {"bpf", 3, {INT, PTR, ULONG, 0, 0, 0}, INT}, \
-	[322] = {"execveat", 5, {INT, STR, STR, STR, INT, 0}, INT}, \
+	[322] = {"execveat", 5, {DIRFD, STR, STR, STR, INT, 0}, INT}, \
 	[323] = {"userfaultfd", 1, {INT, 0, 0, 0, 0, 0}, INT}, \
 	[324] = {"membarrier", 2, {INT, INT, 0, 0, 0, 0}, INT}, \
 	[325] = {"mlock2", 3, {PTR, ULONG, INT, 0, 0, 0}, INT}, \

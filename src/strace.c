@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/14 01:35:35 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/16 23:41:37 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/18 17:44:28 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,14 +38,12 @@ static void	strace(char **av, char **envp)
 	if (pid == 0) {
 		child(filename, av, envp);
 	} else {
-		if (process(pid, class) == FAILURE)
-			goto exit_err;
+		free(filename);
+		process(pid, class);
 	}
-	free(filename);
 	return;
 err:
 	printf("strace: %s: %s\n", av[0], strerror(errno));
-exit_err:
 	if (filename)
 		free(filename);
 	exit(1);
