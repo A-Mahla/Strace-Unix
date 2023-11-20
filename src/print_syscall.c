@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 23:57:49 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/19 02:52:43 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/20 03:47:13 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ static void	print_errno(int code)
 {
 	static const char	*err[] = ERRNO_CODE;
 
-	printf(" %s (%s)", err[code], strerror(code));
+	dprintf(2, " %s (%s)", err[code], strerror(code));
 }
 
 
@@ -35,14 +35,22 @@ static bool	is_execve_or_exit(const char *name)
 }
 
 
-void	print_syscall64(struct syscall_s syscall, uint8_t arch,
+static void	padding(uint32_t ret)
+{
+	uint8_t	pad = 38;
+
+	if (ret > 38)
+		return;
+	for (int i = pad - ret; i >= 0; i--) {
+		write(1, " ", 1);
+	}
+}
+
+
+void	print_syscall64(struct syscall_s syscall,
 	struct user_regs_struct64 *regs, pid_t child, bool is_ret)
 {
-	static struct user_regs_struct64 local;
-	(void)arch;
-	(void)is_ret;
-	(void)local;
-
+	uint32_t	ret = 0;
 //	TO DELETE AFTER SIGNAL HANDLING
 	if (!is_start && strcmp(syscall.name, "execve") == 0)
 		is_start = true;
@@ -52,43 +60,42 @@ void	print_syscall64(struct syscall_s syscall, uint8_t arch,
 	if ((is_ret && !is_execve_or_exit(syscall.name))
 		|| (!is_ret && is_execve_or_exit(syscall.name))
 	) {
-		printf("%s(", syscall.name);
+		ret += dprintf(2, "%s(", syscall.name);
 		for (unsigned int i = 0; i < syscall.argc; i++) {
 			if (syscall.type_args[i] == 0)
 				break;
 			if (i == 0)
-				print_type(syscall.type_args[i], child, regs->rdi, arch);
+				ret += print_type(syscall.type_args[i], child, regs->rdi);
 			else if (i == 1)
-				print_type(syscall.type_args[i], child, regs->rsi, arch);
+				ret += print_type(syscall.type_args[i], child, regs->rsi);
 			else if (i == 2)
-				print_type(syscall.type_args[i], child, regs->rdx, arch);
+				ret += print_type(syscall.type_args[i], child, regs->rdx);
 			else if (i == 3)
-				print_type(syscall.type_args[i], child, regs->r10, arch);
+				ret += print_type(syscall.type_args[i], child, regs->r10);
 			else if (i == 4)
-				print_type(syscall.type_args[i], child, regs->r8, arch);
+				ret += print_type(syscall.type_args[i], child, regs->r8);
 			else if (i == 5)
-				print_type(syscall.type_args[i], child, regs->r9, arch);
+				ret += print_type(syscall.type_args[i], child, regs->r9);
 			if (i < syscall.argc - 1)
-				printf(", ");
+				ret += dprintf(2, ", ");
 		}
-		printf(")");
+		ret += dprintf(2, ")");
+		padding(ret);
 	}
 	if (is_ret) {
-		printf(" = ");
+		dprintf(2, " = ");
 		if (syscall.type_ret == INT && (int)regs->rax < 0) {
-			print_type(syscall.type_ret, child, -1, arch);
+			print_type(syscall.type_ret, child, -1);
 			print_errno((int)regs->rax * -1);
 		} else {
-			print_type(syscall.type_ret, child, regs->rax, arch);
+			print_type(syscall.type_ret, child, regs->rax);
 		}
-		printf("\n");
-	} else {
-		local = *regs;
+		dprintf(2, "\n");
 	}
 }
 
 
-void	print_syscall32(struct syscall_s syscall, uint8_t arch,
+void	print_syscall32(struct syscall_s syscall,
 	struct user_regs_struct32 *regs, pid_t child, bool is_ret)
 {
 	(void)arch;
@@ -101,7 +108,7 @@ void	print_syscall32(struct syscall_s syscall, uint8_t arch,
 		return;
 /////////////////
 	if (is_ret)
-		printf(" => %ld\n", regs->eax);
+		dprintf(2, " => %ld\n", regs->eax);
 	else
-		printf("%s()", syscall.name);
+		dprintf(2, "%s()", syscall.name);
 }

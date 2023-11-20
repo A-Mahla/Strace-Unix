@@ -19,7 +19,7 @@
 	[ 11] = {"execve", 3, {STR, ARGV, ENVP, 0, 0, 0}, INT}, \
 	[ 12] = {"chdir", 1, {STR, 0, 0, 0, 0, 0}, INT}, \
 	[ 13] = {"time", 1, {PTR, 0, 0, 0, 0, 0}, ULONG}, \
-	[ 14] = {"mknod", 3, {STR, MODE, DEV, 0, 0, 0}, INT}, \
+	[ 14] = {"mknod", 3, {STR, MODE, INT, 0, 0, 0}, INT}, \
 	[ 15] = {"chmod", 2, {STR, MODE, 0, 0, 0, 0}, INT}, \
 	[ 16] = {"lchown", 3, {STR, INT, INT, 0, 0, 0}, INT}, \
 	[ 17] = {"break", 1, {PTR, 0, 0, 0, 0, 0}, INT}, \
@@ -30,7 +30,7 @@
 	[ 22] = {"oldumount", 1, {STR, 0, 0, 0, 0, 0}, INT}, \
 	[ 23] = {"setuid", 1, {INT, 0, 0, 0, 0, 0}, INT}, \
 	[ 24] = {"getuid", 0, {0, 0, 0, 0, 0, 0}, INT}, \
-	[ 25] = {"stime", 1, {TIME, 0, 0, 0, 0, 0}, INT}, \
+	[ 25] = {"stime", 1, {PTR, 0, 0, 0, 0, 0}, INT}, \
 	[ 26] = {"ptrace", 4, {PTRACE, INT, PTR, PTR, 0, 0}, LONG}, \
 	[ 27] = {"alarm", 1, {ULONG, 0, 0, 0, 0, 0}, ULONG}, \
 	[ 28] = {"oldfstat", 2, {INT, STRUCT_OLDKERNELSTAT, 0, 0, 0, 0}, INT}, \
@@ -67,7 +67,7 @@
 	[ 59] = {"oldolduname", 1, {PTR, 0, 0, 0, 0, 0}, INT}, \
 	[ 60] = {"umask", 1, {INT, 0, 0, 0, 0, 0}, INT}, \
 	[ 61] = {"chroot", 1, {STR, 0, 0, 0, 0, 0}, INT}, \
-	[ 62] = {"ustat", 2, {DEV, PTR, 0, 0, 0, 0}, INT}, \
+	[ 62] = {"ustat", 2, {INT, PTR, 0, 0, 0, 0}, INT}, \
 	[ 63] = {"dup2", 2, {ULONG, ULONG, 0, 0, 0, 0}, INT}, \
 	[ 64] = {"getppid", 0, {0, 0, 0, 0, 0, 0}, INT}, \
 	[ 65] = {"getpgrp", 0, {0, 0, 0, 0, 0, 0}, INT}, \

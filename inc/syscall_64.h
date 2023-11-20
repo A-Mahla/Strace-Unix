@@ -15,10 +15,10 @@
 	[  7] = {"poll", 3, {STRUCT_POLL, ULONG, INT, 0, 0, 0}, INT}, \
 	[  8] = {"lseek", 3, {INT, OFF, INT, 0, 0, 0}, PTR}, \
 	[  9] = {"mmap", 6, {PTR, ULONG, FLAG_PROT, FLAG_MMAP, INT, OFF}, PTR}, \
-	[ 10] = {"mprotect", 3, {PTR, ULONG, INT, 0, 0, 0}, INT}, \
+	[ 10] = {"mprotect", 3, {PTR, ULONG, FLAG_PROT, 0, 0, 0}, INT}, \
 	[ 11] = {"munmap", 2, {PTR, ULONG, 0, 0, 0, 0}, INT}, \
 	[ 12] = {"brk", 1, {PTR, 0, 0, 0, 0, 0}, PTR}, \
-	[ 13] = {"rt_sigaction", 3, {SIGNAL, STRUCT_SIGACT, STRUCT_SIGACT, 0, 0, 0}, INT}, \
+	[ 13] = {"rt_sigaction", 3, {INT, STRUCT_SIGACT, STRUCT_SIGACT, 0, 0, 0}, INT}, \
 	[ 14] = {"rt_sigprocmask", 4, {INT, STRUCT_SIGSET, STRUCT_SIGSET, 0, 0, 0}, INT}, \
 	[ 15] = {"rt_sigreturn", 0, {0, 0, 0, 0, 0, 0}, INT}, \
 	[ 16] = {"ioctl", 3, {INT, ULONG, 0, 0, 0, 0}, INT}, \
@@ -34,7 +34,7 @@
 	[ 26] = {"msync", 3, {PTR, ULONG, INT, 0, 0, 0}, INT}, \
 	[ 27] = {"mincore", 3, {PTR, ULONG, STR, 0, 0, 0}, INT}, \
 	[ 28] = {"madvise", 3, {PTR, ULONG, INT, 0, 0, 0}, INT}, \
-	[ 29] = {"shmget", 3, {KEY, ULONG, INT, 0, 0, 0}, INT}, \
+	[ 29] = {"shmget", 3, {INT, ULONG, INT, 0, 0, 0}, INT}, \
 	[ 30] = {"shmat", 3, {INT, PTR, INT, 0, 0, 0}, INT}, \
 	[ 31] = {"shmctl", 3, {INT, INT, STRUCT_SHMID, 0, 0, 0}, INT}, \
 	[ 32] = {"dup", 1, {INT, 0, 0, 0, 0, 0}, INT}, \
@@ -58,7 +58,7 @@
 	[ 50] = {"listen", 2, {INT, INT, 0, 0, 0, 0}, INT}, \
 	[ 51] = {"getsockname", 3, {INT, STRUCT_SOCKADDR, ULONG, 0, 0, 0}, INT}, \
 	[ 52] = {"getpeername", 3, {INT, STRUCT_SOCKADDR, ULONG, 0, 0, 0}, INT}, \
-	[ 53] = {"socketpair", 4, {INT, INT, INT, SV, 0, 0}, INT}, \
+	[ 53] = {"socketpair", 4, {INT, INT, INT, PIPE, 0, 0}, INT}, \
 	[ 54] = {"setsockopt", 5, {INT, INT, INT, PTR, ULONG, 0}, INT}, \
 	[ 55] = {"getsockopt", 5, {INT, INT, INT, PTR, ULONG, 0}, INT}, \
 	[ 56] = {"clone", 5, {PTR, PTR, INT, INT, PTR, 0}, INT}, \
@@ -69,11 +69,11 @@
 	[ 61] = {"wait4", 4, {INT, PTR, INT, STRUCT_RUSAGE, 0, 0}, INT}, \
 	[ 62] = {"kill", 2, {INT, INT, 0, 0, 0, 0}, INT}, \
 	[ 63] = {"uname", 1, {STRUCT_UTSNAME, 0, 0, 0, 0, 0}, INT}, \
-	[ 64] = {"semget", 3, {KEY, INT, INT, 0, 0, 0}, INT}, \
+	[ 64] = {"semget", 3, {INT, INT, INT, 0, 0, 0}, INT}, \
 	[ 65] = {"semop", 3, {INT, STRUCT_SEMBUF, ULONG, STRUCT_TIMESPEC, 0, 0}, INT}, \
 	[ 66] = {"semctl", 4, {INT, INT, INT, 0, 0, 0}, INT}, \
 	[ 67] = {"shmdt", 1, {PTR, 0, 0, 0, 0, 0}, INT}, \
-	[ 68] = {"msgget", 2, {KEY, INT, 0, 0, 0, 0}, INT}, \
+	[ 68] = {"msgget", 2, {INT, INT, 0, 0, 0, 0}, INT}, \
 	[ 69] = {"msgsnd", 4, {INT, PTR, ULONG, INT, 0, 0}, INT}, \
 	[ 70] = {"msgrcv", 5, {INT, PTR, ULONG, ULONG, INT, 0}, ULONG}, \
 	[ 71] = {"msgctl", 3, {INT, INT, STRUCT_MSGID, 0, 0, 0}, INT}, \
@@ -262,7 +262,7 @@
 	[254] = {"inotify_add_watch", 3, {INT, STR, ULONG, 0, 0, 0}, INT}, \
 	[255] = {"inotify_rm_watch", 2, {INT, INT, 0, 0, 0, 0}, INT}, \
 	[256] = {"migrate_pages", 4, {INT, ULONG, PTR, PTR, 0, 0}, LONG}, \
-	[257] = {"openat", 3, {DIRFD, STR, INT, 0, 0, 0}, INT}, \
+	[257] = {"openat", 3, {DIRFD, STR, MODE, 0, 0, 0}, INT}, \
 	[258] = {"mkdirat", 3, {DIRFD, STR, MODE, 0, 0, 0}, INT}, \
 	[259] = {"mknodat", 4, {DIRFD, STR, MODE, ULONG, 0, 0}, INT}, \
 	[260] = {"fchownat", 5, {DIRFD, STR, INT, INT, INT, 0}, INT}, \

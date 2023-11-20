@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 15:16:23 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/16 22:46:41 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/20 01:58:31 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ uint8_t	arch(char *filename, char *av)
 
 	if (stat(filename, &statbuf) < 0) {
 		free(filename);
-		printf("strace: Can't stat '%s': %s\n", av, strerror(errno));
+		dprintf(2, "strace: Can't stat '%s': %s\n", av, strerror(errno));
 		exit(1);
 	}
 	if ((fd = open(filename, O_RDONLY)) < 0)

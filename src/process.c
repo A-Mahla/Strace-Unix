@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 01:37:20 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/19 01:43:46 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/20 03:48:47 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ static void	getregset(bool is_ret, pid_t child, void *regs, uint8_t arch,
 	if (arch == ELFCLASS32) {
 		print_syscall32(
 			syscall[(*(struct user_regs_struct32 *)regs).orig_eax],
-			arch,
 			regs,
 			child,
 			is_ret
@@ -51,7 +50,6 @@ static void	getregset(bool is_ret, pid_t child, void *regs, uint8_t arch,
 	} else {
 		print_syscall64(
 			syscall[(*(struct user_regs_struct64 *)regs).orig_rax],
-			arch,
 			regs,
 			child,
 			is_ret
@@ -122,4 +120,5 @@ void	process(pid_t child, uint8_t arch)
 		loop32(child, arch);
 	else
 		loop64(child, arch);
+	dprintf(2, " = ?\n");
 }

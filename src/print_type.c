@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/17 18:00:59 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/19 03:55:18 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/20 03:37:03 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,81 +31,79 @@ static uint8_t	read_data_from_memory(pid_t child, unsigned long long int value,
 }
 
 
-static void	print_undef(pid_t child, unsigned long long int value, uint8_t arch)
+static uint32_t	print_undef(__unused pid_t child,
+	__unused unsigned long long int value)
 {
-	(void)arch;
-	(void)value;
-	(void)child;
+	return 0;
 }
 
 
-static void	print_int(pid_t child, unsigned long long int value, uint8_t arch)
+static uint32_t	print_int(__unused pid_t child, unsigned long long int value)
 {
-	(void)arch;
-	(void)child;
-	printf("%d", (int)value);
+	return dprintf(2, "%d", (int)value);
 }
 
 
-static void	print_long(pid_t child, unsigned long long int value, uint8_t arch)
+static uint32_t	print_long(__unused pid_t child, unsigned long long int value)
 {
-	(void)arch;
-	(void)child;
-	printf("%ld", (long int)value);
+	return dprintf(2, "%ld", (long int)value);
 }
 
 
-static void	print_ulong(pid_t child, unsigned long long int value, uint8_t arch)
+static uint32_t	print_ulong(__unused pid_t child, unsigned long long int value)
 {
-	(void)arch;
-	(void)child;
-	printf("%lld", (unsigned long long int)value);
+	return dprintf(2, "%lld", (unsigned long long int)value);
+}
+
+static uint32_t	print_float(__unused pid_t child, unsigned long long int value)
+{
+	return dprintf(2, "%Lf", (long double)value);
 }
 
 
-static void	print_ptr(pid_t child, unsigned long long int value, uint8_t arch)
+static uint32_t	print_ptr(__unused pid_t child, unsigned long long int value)
 {
-	(void)arch;
-	(void)child;
 	if (value == 0)
-		printf("NULL");
+		return dprintf(2, "NULL");
 	else
-		printf("%#lx", (uintptr_t)value);
+		return dprintf(2, "%#lx", (uintptr_t)value);
 }
 
 
-static void	print_str(pid_t child, unsigned long long int value, uint8_t arch)
+static uint32_t	print_str(pid_t child, unsigned long long int value)
 {
-	char	buffer[BUFFER_SIZE] = {0};
-	int8_t	i = 0;
-	int8_t	size;
+	char		buffer[BUFFER_SIZE] = {0};
+	uint32_t	ret = 0;
+	int8_t		i = 0;
+	int8_t		size;
 
-	(void)arch;
-	(void)child;
-	(void)value;
 	if (value == 0) {
-		printf("NULL");
+		return dprintf(2, "NULL");
 	} else {
 		size = read_data_from_memory(child, value, BUFFER_SIZE, buffer);
-		printf("\"");
+		ret += dprintf(2, "\"");
 		while ((isprint(*buffer) && buffer[i] && i < size)
 			|| (!isprint(*buffer) && i < size)
 		) {
 			if (isprint(buffer[i]))
-				printf("%c", buffer[i]);
+				ret += dprintf(2, "%c", buffer[i]);
 			else
-				printf("\\%hho", buffer[i]);
+				ret += dprintf(2, "\\%hho", buffer[i]);
 			i++;
 		}
-		printf("\"");
+		ret += dprintf(2, "\"");
 		if (i == BUFFER_SIZE)
-			printf("...");
+			ret += dprintf(2, "...");
 	}
+	return ret;
 }
 
 
-static void	print_flag_open(pid_t child, unsigned long long int value, uint8_t arch)
+static uint32_t	print_flag_open(__unused pid_t child,
+	unsigned long long int value)
 {
+	bool		first = true;
+	uint32_t	ret = 0;
 	static const struct type_flag	flags[] = {
 		[ 0] = {.flag = O_RDONLY, .name = "O_RDONLY"},
 		[ 1] = {.flag = O_WRONLY, .name = "O_WRONLY"},
@@ -118,33 +116,38 @@ static void	print_flag_open(pid_t child, unsigned long long int value, uint8_t a
 		[ 8] = {.flag = O_NONBLOCK, .name = "O_NONBLOCK"},
 		[ 9] = {.flag = O_DSYNC, .name = "O_DSYNC"},
 		[10] = {.flag = FASYNC, .name = "FASYNC"},
-		[13] = {.flag = O_DIRECTORY, .name = "O_DIRECTORY"},
-		[14] = {.flag = O_NOFOLLOW, .name = "O_NOFOLLOW"},
-		[16] = {.flag = O_CLOEXEC, .name = "O_CLOEXEC"},
-		[17] = {.flag = O_SYNC, .name = "O_SYNC"},
-		[20] = {.flag = O_NDELAY, .name = "O_NDELAY"},
+		[11] = {.flag = O_CLOEXEC, .name = "O_CLOEXEC"},
+		[12] = {.flag = O_DIRECTORY, .name = "O_DIRECTORY"},
+		[13] = {.flag = O_NOFOLLOW, .name = "O_NOFOLLOW"},
+		[14] = {.flag = O_SYNC, .name = "O_SYNC"},
+		[15] = {.flag = O_ASYNC, .name = "O_ASYNC"},
+		[16] = {.flag = O_DIRECT, .name = "O_DIRECT"},
+		[17] = {.flag = O_NOATIME, .name = "O_NOATIME"},
+		[18] = {.flag = O_PATH, .name = "O_PATH"},
+		[19] = {.flag = O_RSYNC, .name = "O_RSYNC"},
+		[20] = {.flag = O_ACCMODE, .name = "O_ACCMODE"},
 	};
-	bool first = true;
 
-	(void)arch;
-	(void)child;
 	for (long unsigned int i = 0; i < sizeof(flags) / sizeof(flags[0]); i++)
 	{
-		if ((int)value & flags[i].flag)
+		if (((int)value & flags[i].flag)
+			|| (flags[i].flag == 0 && !((int)value & flags[i].flag) ))
 		{
 			if (!first)
-				printf("|");
+				ret += dprintf(2, "|");
 			else
 				first = false;
-			printf("%s", flags[i].name);
+			ret += dprintf(2, "%s", flags[i].name);
 		}
 	}
-	
+	return ret;
 }
 
 
-static void	print_prot_mmap(pid_t child, unsigned long long int value, uint8_t arch)
+static uint32_t	print_prot_mmap(__unused pid_t child, unsigned long long int value)
 {
+	bool		first = true;
+	uint32_t	ret = 0;
 	static const struct type_flag	flags[] = {
 		[0] = {.flag = PROT_READ, .name = "PROT_READ"},
 		[1] = {.flag = PROT_WRITE, .name = "PROT_WRITE"},
@@ -153,27 +156,28 @@ static void	print_prot_mmap(pid_t child, unsigned long long int value, uint8_t a
 		[4] = {.flag = PROT_GROWSDOWN, .name = "PROT_GROWSDOWN"},
 		[5] = {.flag = PROT_GROWSUP, .name = "PROT_GROWSUP"},
 	};
-	bool first = true;
 
-	(void)arch;
-	(void)child;
 	for (long unsigned int i = 0; i < sizeof(flags) / sizeof(flags[0]); i++)
 	{
 		if ((int)value & flags[i].flag)
 		{
 			if (!first)
-				printf("|");
+				ret += dprintf(2, "|");
 			else
 				first = false;
-			printf("%s", flags[i].name);
+			ret += dprintf(2, "%s", flags[i].name);
 		}
 	}
-	
+	if (first && !((int)value & PROT_NONE))
+		ret += dprintf(2, "%s", "PROT_NONE");
+	return ret;
 }
 
 
-static void	print_flag_mmap(pid_t child, unsigned long long int value, uint8_t arch)
+static uint32_t	print_flag_mmap(__unused pid_t child, unsigned long long int value)
 {
+	bool		first = true;
+	uint32_t	ret = 0;
 	static const struct type_flag	flags[] = {
 		[ 0] = {.flag = MAP_SHARED, .name = "MAP_SHARED"},
 		[ 1] = {.flag = MAP_PRIVATE, .name = "MAP_PRIVATE"},
@@ -191,26 +195,70 @@ static void	print_flag_mmap(pid_t child, unsigned long long int value, uint8_t a
 		[13] = {.flag = MAP_SYNC, .name = "MAP_SYNC"},
 		[14] = {.flag = MAP_FIXED_NOREPLACE, .name = "MAP_FIXED_NOREPLACE"},
 	};
-	bool first = true;
 
-	(void)arch;
-	(void)child;
 	for (long unsigned int i = 0; i < sizeof(flags) / sizeof(flags[0]); i++)
 	{
-		if ((int)value & flags[i].flag)
+		if (((int)value & flags[i].flag)
+			|| (flags[i].flag == 0 && !((int)value & flags[i].flag) ))
 		{
 			if (!first)
-				printf("|");
+				ret += dprintf(2, "|");
 			else
 				first = false;
-			printf("%s", flags[i].name);
+			ret += dprintf(2, "%s", flags[i].name);
 		}
 	}
+	return ret;
 }
 
 
-static void	print_dirfd(pid_t child, unsigned long long int value, uint8_t arch)
+static uint32_t	print_trace_flags(__unused pid_t child, unsigned long long int value)
 {
+	uint32_t	ret = 0;
+	static const struct type_flag	flags[] = {
+		[0] = {.flag = PTRACE_TRACEME, .name = "PTRACE_TRACEME"},
+		[1] = {.flag = PTRACE_PEEKTEXT, .name = "PTRACE_PEEKTEXT"},
+		[2] = {.flag = PTRACE_PEEKDATA, .name = "PTRACE_PEEKDATA"},
+		[3] = {.flag = PTRACE_PEEKUSER, .name = "PTRACE_PEEKUSER"},
+		[4] = {.flag = PTRACE_POKETEXT, .name = "PTRACE_POKETEXT"},
+		[5] = {.flag = PTRACE_POKEDATA, .name = "PTRACE_POKEDATA"},
+		[6] = {.flag = PTRACE_POKEUSER, .name = "PTRACE_POKEUSER"},
+		[7] = {.flag = PTRACE_GETREGS, .name = "PTRACE_GETREGS"},
+		[8] = {.flag = PTRACE_GETFPREGS, .name = "PTRACE_GETFPREGS"},
+		[9] = {.flag = PTRACE_GETSIGINFO, .name = "PTRACE_GETSIGINFO"},
+		[10] = {.flag = PTRACE_SETREGS, .name = "PTRACE_SETREGS"},
+		[11] = {.flag = PTRACE_SETFPREGS, .name = "PTRACE_SETFPREGS"},
+		[12] = {.flag = PTRACE_SETSIGINFO, .name = "PTRACE_SETSIGINFO"},
+		[13] = {.flag = PTRACE_SETOPTIONS, .name = "PTRACE_SETOPTIONS"},
+		[14] = {.flag = PTRACE_GETEVENTMSG, .name = "PTRACE_GETEVENTMSG"},
+		[15] = {.flag = PTRACE_CONT, .name = "PTRACE_CONT"},
+		[16] = {.flag = PTRACE_SYSCALL, .name = "PTRACE_SYSCALL"},
+		[17] = {.flag = PTRACE_SINGLESTEP, .name = "PTRACE_SINGLESTEP"},
+		[18] = {.flag = PTRACE_SYSEMU, .name = "PTRACE_SYSEMU"},
+		[19] = {.flag = PTRACE_SYSEMU_SINGLESTEP, .name = "PTRACE_SYSEMU_SINGLESTEP"},
+		[20] = {.flag = PTRACE_KILL, .name = "PTRACE_KILL"},
+		[21] = {.flag = PTRACE_ATTACH, .name = "PTRACE_ATTACH"},
+		[22] = {.flag = PTRACE_DETACH, .name = "PTRACE_DETACH"},
+		
+	};
+
+	for (long unsigned int i = 0; i < sizeof(flags) / sizeof(flags[0]); i++)
+	{
+		if (value == flags[i].flag)
+		{
+			ret += dprintf(2, "%s", flags[i].name);
+			break;
+		}
+	}
+	return ret;
+}
+
+
+static uint32_t	print_dirfd(__unused pid_t child, unsigned long long int value)
+{
+	uint32_t	ret = 0;
+	bool		first = true;
+	int			new_value = (int)value;
 	static const struct type_flag	flags[] = {
 		[0] = {.flag = AT_FDCWD, .name = "AT_FDCWD"},
 //		[1] = {.flag = AT_SYMLINK_NOFOLLOW, .name = "AT_SYMLINK_NOFOLLOW"},
@@ -218,53 +266,96 @@ static void	print_dirfd(pid_t child, unsigned long long int value, uint8_t arch)
 //		[3] = {.flag = AT_SYMLINK_FOLLOW, .name = "AT_SYMLINK_FOLLOW"},
 //		[4] = {.flag = AT_EACCESS, .name = "AT_EACCESS"},
 	};
-	bool first = true;
-	int new_value = (int)value;
 
-	(void)arch;
-	(void)child;
 	for (long unsigned int i = 0; i < sizeof(flags) / sizeof(flags[0]); i++)
 	{
 		if ( new_value & flags[i].flag)
+		if ((new_value & flags[i].flag)
+			|| (flags[i].flag == 0 && !(new_value & flags[i].flag) ))
 		{
 			if (!first)
-				printf("|");
+				ret += dprintf(2, "|");
 			else
 				first = false;
-			printf("%s", flags[i].name);
+			ret += dprintf(2, "%s", flags[i].name);
 		}
 	}
 	if (first)
-		printf("%d", (int)value);
+		ret += dprintf(2, "%d", (int)value);
+	return ret;
 }
 
 
-static void	print_pipe(pid_t child, unsigned long long int value, uint8_t arch)
+static uint32_t	print_pipe(__unused pid_t child, unsigned long long int value)
 {
-	int	buffer[2];
-	// 255
-	// 65280 = 255 << 8
-	// 16711680 = 255 << 16
-	// 4278190080 = 255 << 24
+	int			buffer[2];
 
-	(void)child;
-	(void)arch;
 	read_data_from_memory(child, value, 2 * sizeof(int), buffer);
-	printf("[%d, %d]", buffer[0], buffer[1]);
+	return dprintf(2, "[%d, %d]", buffer[0], buffer[1]);
 }
 
 
-static void	print_offset(pid_t child, unsigned long long int value, uint8_t arch)
+static uint32_t	print_id(__unused pid_t child, unsigned long long int value)
 {
-	(void)arch;
-	(void)child;
-	printf("%#lx", (uintptr_t)value);
+	int			buffer[1] = {0};
+
+	read_data_from_memory(child, value, 2 * sizeof(int), buffer);
+	return dprintf(2, "[%d, ...]", buffer[0]);
 }
 
 
-void	print_type(enum type_e flag, pid_t child, unsigned long long int value, uint8_t arch)
+static uint32_t	print_offset(__unused pid_t child, unsigned long long int value)
 {
-	static void (*f[])(pid_t, unsigned long long int, uint8_t) = {
+	return dprintf(2, "%#lx", (uintptr_t)value);
+}
+
+
+static uint32_t	print_argv(pid_t child, unsigned long long int value)
+{
+	char		*argv[1];
+	uint32_t	ret = 0;
+	int32_t		i = 0;
+
+	ret += dprintf(2, "[");
+	if (value == 0) {
+		ret += dprintf(2, "NULL");
+	} else {
+		read_data_from_memory(child, value, sizeof(char *), argv);
+		while (*argv) {
+		i += 8;
+		ret += print_str(child, (unsigned long long int)*argv);
+		read_data_from_memory(child, value + i, sizeof(char *), argv);
+		if (*argv)
+			ret += dprintf(2, ", ");
+		}
+	}
+	ret += dprintf(2, "]");
+	return ret;
+}
+
+
+static uint32_t	print_envp(__unused pid_t child, unsigned long long int value)
+{
+	char		*envp[1];
+	uint32_t	ret = 0;
+	int			i = 0;
+	int			y = 0;
+
+	ret += print_ptr(child, value);
+	read_data_from_memory(child, value, sizeof(char *), envp);
+	while (*envp) {
+		i++;
+		y += 8;
+		read_data_from_memory(child, value + y, sizeof(char *), envp);
+	}
+	ret += dprintf(2, " /* %d vars */", i);
+	return ret;
+}
+
+
+uint32_t	print_type(enum type_e flag, pid_t child, unsigned long long int value)
+{
+	static uint32_t (*f[])(pid_t, unsigned long long int) = {
 		[UNDEF] = print_undef,
 		[INT] = print_int,
 		[LONG] = print_long,
@@ -279,18 +370,13 @@ void	print_type(enum type_e flag, pid_t child, unsigned long long int value, uin
 		[OFF] = print_offset, 
 		[DIRFD] = print_dirfd, 
 		[PIPE] = print_pipe,
+		[MODE] = print_flag_open,
+		[CLOCK] = print_float,
+		[PTRACE] = print_trace_flags,
+		[ID_T] = print_id,
+		[ARGV] = print_argv,
+		[ENVP] = print_envp,
 	};
-//		[SV]
-//		[KEY]
-//		[MODE]
-//		[CLOCK]
-//		[PTRACE]
-//		[ID_T]
-//		[DEV]
-//		[TIME]
-//		[SIGNAL]
-//		[ARGV]
-//		[ENVP]
 //		[VARARGS]
 //		[STRUCT_STAT] // Struct types
 //		[STRUCT_POLL]
@@ -352,7 +438,7 @@ void	print_type(enum type_e flag, pid_t child, unsigned long long int value, uin
 //	if ((arch ==  ELFCLASS32 && flag < NB_SYSCALL_32)
 //			|| (arch ==  ELFCLASS64 && flag < NB_SYSCALL_64))
 //		f[flag](value, arch);
-	if ((arch ==  ELFCLASS32 && flag < SV)
-			|| (arch ==  ELFCLASS64 && flag < SV))
-		f[flag](child, value, arch);
+	if (flag < VARARGS)
+		return f[flag](child, value);
+	return 0;
 }
