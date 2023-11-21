@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 01:37:20 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/21 04:31:57 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/21 16:04:16 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,20 @@ static void	next_syscall(pid_t child)
 }
 
 
+static struct syscall_s	find_syscall(uint32_t orig_eax,
+	struct syscall_s syscall64[], struct syscall_s syscall32[])
+{
+	char	*to_find = syscall32[orig_eax].name;
+	int i = 0;
+
+	for (i = 0; i < NB_SYSCALL_64; i++) {
+		if (strcmp(to_find, syscall64[i].name) == 0)
+			return syscall64[i];
+	}
+	return syscall32[orig_eax];
+}
+
+
 static void	getregset(bool is_ret, pid_t child, void *regs,
 	struct iovec *iov, struct syscall_s syscall64[], struct syscall_s syscall32[])
 {
@@ -43,7 +57,11 @@ static void	getregset(bool is_ret, pid_t child, void *regs,
 		if ((*(struct user_regs_struct32 *)regs).orig_eax >= NB_SYSCALL_32)
 			return;
 		print_syscall32(
-			syscall32[(*(struct user_regs_struct32 *)regs).orig_eax],
+			find_syscall(
+				(*(struct user_regs_struct32 *)regs).orig_eax,
+				syscall64,
+				syscall32
+			),
 			regs,
 			child,
 			is_ret

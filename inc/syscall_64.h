@@ -26,7 +26,7 @@
 		[18] = {"pwrite64", 4, {INT, STR, ULONG, OFF, 0, 0}, ULONG},                                       \
 		[19] = {"readv", 3, {INT, STRUCT_IOVEC, INT, 0, 0, 0}, ULONG},                                     \
 		[20] = {"writev", 3, {INT, STRUCT_IOVEC, INT, 0, 0, 0}, ULONG},                                    \
-		[21] = {"access", 2, {STR, INT, 0, 0, 0, 0}, INT},                                                 \
+		[21] = {"access", 2, {STR, FLAG_ACCESS, 0, 0, 0, 0}, INT},                                                 \
 		[22] = {"pipe", 1, {PIPE, INT, 0, 0, 0, 0}, INT},                                                  \
 		[23] = {"select", 5, {INT, STRUCT_FDSET, STRUCT_FDSET, STRUCT_FDSET, STRUCT_TIMEVAL, 0}, INT},     \
 		[24] = {"sched_yield", 0, {0, 0, 0, 0, 0, 0}, INT},                                                \
@@ -142,7 +142,7 @@
 		[134] = {"uselib", 1, {STR, 0, 0, 0, 0, 0}, INT},                                                  \
 		[135] = {"personality", 1, {ULONG, 0, 0, 0, 0, 0}, INT},                                           \
 		[136] = {"ustat", 2, {INT, STRUCT_USTAT, 0, 0, 0, 0}, INT},                                        \
-		[137] = {"fs", 2, {STR, STRUCT_STATFS, 0, 0, 0, 0}, INT},                                          \
+		[137] = {"statfs", 2, {STR, STRUCT_STATFS, 0, 0, 0, 0}, INT},                                          \
 		[138] = {"fstatfs", 2, {INT, STRUCT_STATFS, 0, 0, 0, 0}, INT},                                     \
 		[139] = {"sysfs", 3, {INT, INT, ULONG, 0, 0, 0}, INT},                                             \
 		[140] = {"getpriority", 2, {INT, INT, 0, 0, 0, 0}, INT},                                           \
@@ -208,8 +208,8 @@
 		[200] = {"tkill", 2, {INT, INT, 0, 0, 0, 0}, INT},                                                 \
 		[201] = {"time", 1, {PTR, 0, 0, 0, 0, 0}, LONG},                                                   \
 		[202] = {"futex", 6, {PTR, INT, INT, STRUCT_TIMESPEC, PTR, INT}, INT},                             \
-		[203] = {"sched_setaffinity", 3, {INT, ULONG, STRUCT_CPU_SET, 0, 0, 0}, INT},                      \
-		[204] = {"sched_getaffinity", 3, {INT, ULONG, STRUCT_CPU_SET, 0, 0, 0}, INT},                      \
+		[203] = {"sched_setaffinity", 3, {INT, ULONG, STRUCT_SCHED_PARAM, 0, 0, 0}, INT},                  \
+		[204] = {"sched_getaffinity", 3, {INT, ULONG, STRUCT_SCHED_PARAM, 0, 0, 0}, INT},                  \
 		[205] = {"set_thread_area", 1, {STRUCT_USER_DESC, 0, 0, 0, 0, 0}, INT},                            \
 		[206] = {"io_setup", 2, {ULONG, PTR, 0, 0, 0, 0}, INT},                                            \
 		[207] = {"io_destroy", 1, {INT, 0, 0, 0, 0, 0}, INT},                                              \
@@ -222,7 +222,7 @@
 		[214] = {"epoll_ctl_old", 0, {0, 0, 0, 0, 0, 0}, INT},                                             \
 		[215] = {"epoll_wait_old", 0, {0, 0, 0, 0, 0, 0}, INT},                                            \
 		[216] = {"remap_file_pages", 5, {PTR, ULONG, INT, ULONG, INT, 0}, INT},                            \
-		[217] = {"getdents64", 3, {ULONG, STRUCT_LINUX_DIRENT64, ULONG, 0, 0, 0}, ULONG},                  \
+		[217] = {"getdents64", 3, {ULONG, STRUCT_LINUX_DIR, ULONG, 0, 0, 0}, ULONG},                       \
 		[218] = {"set_tid_address", 1, {INT, 0, 0, 0, 0, 0}, LONG},                                        \
 		[219] = {"restart_syscall", 0, {0, 0, 0, 0, 0, 0}, INT},                                           \
 		[220] = {"semtimedop", 4, {INT, STRUCT_SEMBUF, ULONG, STRUCT_TIMESPEC, 0, 0}, INT},                \
@@ -245,7 +245,7 @@
 		[237] = {"mbind", 6, {PTR, ULONG, INT, PTR, ULONG, ULONG}, INT},                                   \
 		[238] = {"set_mempolicy", 3, {INT, PTR, ULONG, 0, 0, 0}, INT},                                     \
 		[239] = {"get_mempolicy", 5, {PTR, PTR, ULONG, ULONG, ULONG, 0}, INT},                             \
-		[240] = {"mq_open", 4, {STR, INT, MODE, STRUCT_MQ_ATTR, 0, 0}, INT},                               \
+		[240] = {"mq_open", 4, {STR,  MODE, INT, STRUCT_MQ_ATTR, 0, 0}, INT},                               \
 		[241] = {"mq_unlink", 1, {STR, 0, 0, 0, 0, 0}, INT},                                               \
 		[242] = {"mq_timedsend", 5, {INT, STR, ULONG, ULONG, STRUCT_TIMESPEC, 0}, INT},                    \
 		[243] = {"mq_timedreceive", 5, {INT, STR, ULONG, ULONG, STRUCT_TIMESPEC, 0}, ULONG},               \
@@ -274,7 +274,7 @@
 		[266] = {"symlinkat", 3, {STR, DIRFD, STR, 0, 0, 0}, INT},                                         \
 		[267] = {"readlinkat", 4, {DIRFD, STR, STR, ULONG, 0, 0}, INT},                                    \
 		[268] = {"fchmodat", 3, {DIRFD, STR, MODE, 0, 0, 0}, INT},                                         \
-		[269] = {"faccessat", 3, {DIRFD, STR, INT, 0, 0, 0}, INT},                                         \
+		[269] = {"faccessat", 3, {DIRFD, STR, FLAG_ACCESS, 0, 0, 0}, INT},                                         \
 		[270] = {"pselect6", 6, {INT, PTR, PTR, PTR, STRUCT_TIMESPEC, PTR}, INT},                          \
 		[271] = {"ppoll", 5, {STRUCT_POLLFD, ULONG, STRUCT_TIMESPEC, STRUCT_SIGSET, ULONG, 0}, INT},       \
 		[272] = {"unshare", 1, {INT, 0, 0, 0, 0, 0}, INT},                                                 \

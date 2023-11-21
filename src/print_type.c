@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/17 18:00:59 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/21 01:41:35 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/21 23:07:12 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,6 @@ static uint32_t	read_data_from_memory(pid_t child, unsigned long long int value,
 //		exit(1);
 		return 0;
 	}
-//	if (ret < size)
-//		((char *)local_buffer)[ret] = '\0';
 	return ret;
 }
 
@@ -127,6 +125,33 @@ static uint32_t	print_flag_open(__unused pid_t child,
 		[18] = {.flag = O_PATH, .name = "O_PATH"},
 		[19] = {.flag = O_RSYNC, .name = "O_RSYNC"},
 		[20] = {.flag = O_ACCMODE, .name = "O_ACCMODE"},
+	};
+
+	for (long unsigned int i = 0; i < sizeof(flags) / sizeof(flags[0]); i++)
+	{
+		if (((int)value & flags[i].flag)
+			|| (flags[i].flag == 0 && !((int)value & flags[i].flag) ))
+		{
+			if (!first)
+				ret += dprintf(2, "|");
+			else
+				first = false;
+			ret += dprintf(2, "%s", flags[i].name);
+		}
+	}
+	return ret;
+}
+
+
+static uint32_t	print_flag_access(__unused pid_t child, unsigned long long int value)
+{
+	bool		first = true;
+	uint32_t	ret = 0;
+	static const struct type_flag	flags[] = {
+		[ 0] = {.flag = R_OK, .name = "R_OK"},
+		[ 1] = {.flag = W_OK, .name = "W_OK"},
+		[ 2] = {.flag = X_OK, .name = "X_OK"},
+		[ 3] = {.flag = F_OK, .name = "F_OK"},
 	};
 
 	for (long unsigned int i = 0; i < sizeof(flags) / sizeof(flags[0]); i++)
@@ -465,88 +490,288 @@ static uint32_t print_struct_sembuf(pid_t child, unsigned long long int value)
 }
 
 
+static uint32_t print_struct_msgid(pid_t child, unsigned long long int value)
+{
+	struct msqid_ds	buf;
+	struct ipc_perm	msg;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct msqid_ds), &buf) != sizeof(struct msqid_ds))
+		return 0;
+	msg = buf.msg_perm;
+	return dprintf(2, "msg_perm={uid=%u, gid=%u, mode=%u, key=%u, cuid=%u, cgid=%u}, "
+					  "msg_stime=%ld, msg_rtime=%ld, msg_ctime=%ld, msg_qnum=%ld, "
+					  "msg_qbytes=%ld, msg_lspid=%d, msg_lrpid=%d",
+		msg.uid, msg.gid, msg.mode, msg.__key, msg.cuid, msg.cgid, buf.msg_stime,
+		buf.msg_rtime, buf.msg_ctime, buf.msg_qnum, buf.msg_qbytes, buf.msg_lspid,
+		buf.msg_lrpid);
+}
+
+
+static uint32_t print_struct_rlimit(pid_t child, unsigned long long int value)
+{
+	struct rlimit	buf;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct rlimit), &buf) != sizeof(struct rlimit))
+		return 0;
+	return dprintf(2, "{rlim_cur=%ld, rlim_max=%ld}", buf.rlim_cur, buf.rlim_max);
+}
+
+
+static uint32_t print_struct_sysinfo(pid_t child, unsigned long long int value)
+{
+	struct sysinfo	buf;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct sysinfo), &buf) != sizeof(struct sysinfo))
+		return 0;
+	return dprintf(2, "{uptime=%ld, loads=[%ld, %ld, %ld], totalram=%ld, "
+						"freeram=%ld, sharedram=%ld, bufferram=%ld, totalswap=%ld, "
+						"freeswap=%ld, procs=%d, totalhigh=%ld, freehigh=%ld, mem_unit=%d}",
+		buf.uptime, buf.loads[0], buf.loads[1], buf.loads[2], buf.totalram,
+		buf.freeram, buf.sharedram, buf.bufferram, buf.totalswap, buf.freeswap,
+		buf.procs, buf.totalhigh, buf.freehigh, buf.mem_unit);
+}
+
+
+static uint32_t print_struct_siginfo(pid_t child, unsigned long long int value)
+{
+	siginfo_t	buf;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(siginfo_t), &buf) != sizeof(siginfo_t))
+		return 0;
+	return dprintf(2, "{si_signo=%d, si_code=%d, si_pid=%d, si_uid=%d, "
+					  "si_status=%d, si_utime=%ld, si_stime=%ld}",
+		buf.si_signo, buf.si_code, buf.si_pid, buf.si_uid, buf.si_status,
+		buf.si_utime, buf.si_stime);
+}
+
+
+static uint32_t print_struct_tms(pid_t child, unsigned long long int value)
+{
+	struct tms	buf;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct tms), &buf) != sizeof(struct tms))
+		return 0;
+	return dprintf(2, "{tms_utime=%ld, tms_stime=%ld, tms_cutime=%ld, tms_cstime=%ld}",
+		buf.tms_utime, buf.tms_stime, buf.tms_cutime, buf.tms_cstime);
+}
+
+
+static uint32_t print_struct_sigstack(pid_t child, unsigned long long int value)
+{
+	stack_t	buf;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(stack_t), &buf) != sizeof(stack_t))
+		return 0;
+	return dprintf(2, "{ss_sp=%p, ss_flags=%d, ss_size=%d}",
+		buf.ss_sp, buf.ss_flags, buf.ss_flags);
+}
+
+
+static uint32_t print_struct_utimbuf(pid_t child, unsigned long long int value)
+{
+	struct utimbuf	buf;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct utimbuf), &buf) != sizeof(struct utimbuf))
+		return 0;
+	return dprintf(2, "{actime=%ld, modtime=%ld}", buf.actime, buf.modtime);
+}
+
+
+static uint32_t print_struct_shed_param(pid_t child, unsigned long long int value)
+{
+	struct sched_param	buf;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct sched_param), &buf) != sizeof(struct sched_param))
+		return 0;
+	return dprintf(2, "[%d]", buf.sched_priority);
+}
+
+
+uint32_t print_struct_statfs(pid_t child, unsigned long long int value)
+{
+	struct statfs	buf;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct statfs), &buf) != sizeof(struct statfs))
+		return 0;
+	return dprintf(2, "{f_bsize=%lu, f_blocks=%lu, f_bfree=%lu, f_bavail=%lu, "
+					  "f_files=%lu, f_ffree=%lu, f_fsid=%d, f_flags=%lu, f_namelen=%lu}",
+    buf.f_bsize, buf.f_blocks, buf.f_bfree, buf.f_bavail, buf.f_files,
+	buf.f_ffree, buf.f_fsid.__val[0], buf.f_flags, buf.f_namelen);
+}
+
+
+static uint32_t print_struct_sigevent(pid_t child, unsigned long long int value)
+{
+	struct sigevent	buf;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct sigevent), &buf) != sizeof(struct sigevent))
+		return 0;
+	return dprintf(2, "{sigev_signo=%d, sigev_notify=%d}", buf.sigev_signo, buf.sigev_notify);
+}
+
+
+static uint32_t print_struct_itimerspec(pid_t child, unsigned long long int value)
+{
+	struct itimerspec	buffer;
+	uint32_t		ret = 0;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct itimerspec), &buffer) != sizeof(struct itimerspec))
+		return 0;
+	return dprintf(2, "{it_interval={tv_sec=%ld, tv_nsec=%ld}, it_value={tv_sec=%ld, tv_nsec=%ld}",
+		buffer.it_interval.tv_sec, buffer.it_interval.tv_nsec,
+		buffer.it_value.tv_sec, buffer.it_value.tv_nsec);
+	return ret;
+}
+
+
+static uint32_t print_struct_mqattr(pid_t child, unsigned long long int value)
+{
+	struct mq_attr	buf;
+	uint32_t		ret = 0;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct mq_attr), &buf) != sizeof(struct mq_attr))
+		return 0;
+	return dprintf(2, "{mq_flags=%ld, mq_maxmsg=%ld, mq_msgsize=%ld, mq_curmsgs=%ld}",
+		buf.mq_flags, buf.mq_maxmsg, buf.mq_msgsize, buf.mq_curmsgs);
+	return ret;
+}
+
+
+static uint32_t print_struct_perfeventattr(pid_t child, unsigned long long int value)
+{
+	struct perf_event_attr	buf;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct perf_event_attr), &buf) != sizeof(struct perf_event_attr))
+		return 0;
+	return dprintf(2, "{type=%d, size=%d, config=%lld, sample_period=%lld, "
+					  "sample_type=%lld, read_format=%lld, disabled=%d, exclude_kernel=%d, "
+					  "exclude_hv=%d, exclude_idle=%d, precise_ip=%d}",
+		buf.type, buf.size, buf.config, buf.sample_period, buf.sample_type,
+		buf.read_format, buf.disabled, buf.exclude_kernel, buf.exclude_hv,
+		buf.exclude_idle, buf.precise_ip);
+}
+
+
+static uint32_t print_struct_pollfd(pid_t child, unsigned long long int value)
+{
+	struct pollfd	buffer;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct pollfd), &buffer) != sizeof(struct pollfd))
+		return 0;
+	return dprintf(2, "[{fd=%d, events=%d},]", buffer.fd, buffer.events);
+}
+
+
+static uint32_t (*f[])(pid_t, unsigned long long int) = {
+	[UNDEF] = print_undef,
+	[INT] = print_int,
+	[LONG] = print_long,
+	[ULONG] = print_ulong,
+	[PTR] = print_ptr,
+	[STR] = print_str,
+	[CONST_STR] = print_str,
+	[FLAG_OPEN] = print_flag_open,
+	[FLAG_OPENAT] = print_flag_open,
+	[FLAG_ACCESS] = print_flag_access,
+	[FLAG_PROT] = print_prot_mmap,
+	[FLAG_MMAP] = print_flag_mmap,
+	[OFF] = print_offset, 
+	[DIRFD] = print_dirfd, 
+	[PIPE] = print_pipe,
+	[MODE] = print_flag_open,
+	[CLOCK] = print_float,
+	[PTRACE] = print_trace_flags,
+	[ID_T] = print_id,
+	[ARGV] = print_argv,
+	[ENVP] = print_envp,
+	[VARARGS] = print_str,
+	[STRUCT_STAT] = print_struct_stat,
+	[STRUCT_SIGACT] = print_struct_sigact,
+	[STRUCT_SIGSET] = print_ptr,
+	[STRUCT_SIGINF] = print_ptr,
+	[STRUCT_IOVEC] = print_struct_iovec,
+	[STRUCT_FDSET] = print_ptr,
+	[STRUCT_TIMEVAL] = print_struct_timeval,
+	[STRUCT_TIMEZONE] = print_struct_timezone,
+	[STRUCT_TIMESPEC] = print_struct_timespec,
+	[STRUCT_SHMID] = print_ptr,
+	[STRUCT_SOCKADDR] = print_ptr,
+	[STRUCT_MSGHDR] = print_ptr,
+	[STRUCT_RUSAGE] = print_struct_rusage,
+	[STRUCT_UTSNAME] = print_struct_utsusage,
+	[STRUCT_SEMBUF] = print_struct_sembuf,
+	[STRUCT_MSGID] = print_struct_msgid,
+	[STRUCT_LINUX_DIR] = print_ptr,
+	[STRUCT_RLIMIT] = print_struct_rlimit,
+	[STRUCT_SYSINFO] = print_struct_sysinfo,
+	[STRUCT_SIGINFO] = print_struct_siginfo,
+	[STRUCT_TMS] = print_struct_tms,
+	[STRUCT_SIGSTACK] = print_struct_sigstack,
+	[STRUCT_UTIMBUF] = print_struct_utimbuf,
+	[STRUCT_USTAT] = print_ptr,
+	[STRUCT_STATFS] = print_ptr,
+	[STRUCT_SCHED_PARAM] = print_struct_shed_param,
+	[STRUCT_SYSCTL] = print_ptr,
+	[STRUCT_TIMEX] = print_ptr,
+	[STRUCT_KERNEL_SYM] = print_ptr,
+	[STRUCT_NFSCTL_ARG] = print_ptr,
+	[STRUCT_NFSCTL_RES] = print_ptr,
+	[STRUCT_STRBUF] = print_ptr,
+	[STRUCT_USER_DESC] = print_ptr,
+	[STRUCT_IO_EVENT] = print_ptr,
+	[STRUCT_IOCB] = print_ptr,
+	[STRUCT_SIGEVENT] = print_struct_sigevent,
+	[STRUCT_ITIMERSPEC] = print_struct_itimerspec,
+	[STRUCT_EPOLL_EVENT] = print_ptr,
+	[STRUCT_MQ_ATTR] = print_struct_mqattr,
+	[STRUCT_KEXEC_SEGMENT] = print_ptr,
+	[STRUCT_PERF_EVENT_ATTR] = print_struct_perfeventattr,
+	[STRUCT_MMSGHDR] = print_ptr,
+	[STRUCT_FILE_HANDLE] = print_ptr,
+	[STRUCT_GETCPU_CACHE] = print_ptr,
+	[STRUCT_SCHED_ATTR] = print_ptr,
+	[STRUCT_STATX] = print_ptr,
+	[STRUCT_PTREGS] = print_ptr,
+	[STRUCT_POLLFD] = print_struct_pollfd,
+	[STRUCT_ROBUST_LIST_HEAD] = print_str,
+	[STRUCT_OLDKERNELSTAT] = print_struct_stat,
+	[STRUCT_VM86] = print_ptr, 
+	[STRUCT_VM86PLUS] = print_ptr,
+	[STRUCT_NEWUTSNAME] = print_ptr,
+};
+
+
 uint32_t	print_type(enum type_e flag, pid_t child, unsigned long long int value)
 {
-	static uint32_t (*f[])(pid_t, unsigned long long int) = {
-		[UNDEF] = print_undef,
-		[INT] = print_int,
-		[LONG] = print_long,
-		[ULONG] = print_ulong,
-		[PTR] = print_ptr,
-		[STR] = print_str,
-		[CONST_STR] = print_str,
-		[FLAG_OPEN] = print_flag_open,
-		[FLAG_OPENAT] = print_flag_open,
-		[FLAG_PROT] = print_prot_mmap,
-		[FLAG_MMAP] = print_flag_mmap,
-		[OFF] = print_offset, 
-		[DIRFD] = print_dirfd, 
-		[PIPE] = print_pipe,
-		[MODE] = print_flag_open,
-		[CLOCK] = print_float,
-		[PTRACE] = print_trace_flags,
-		[ID_T] = print_id,
-		[ARGV] = print_argv,
-		[ENVP] = print_envp,
-		[VARARGS] = print_str,
-		[STRUCT_STAT] = print_struct_stat,
-		[STRUCT_SIGACT] = print_struct_sigact,
-		[STRUCT_SIGSET] = print_ptr,
-		[STRUCT_SIGINF] = print_ptr,
-		[STRUCT_IOVEC] = print_struct_iovec,
-		[STRUCT_FDSET] = print_ptr,
-		[STRUCT_TIMEVAL] = print_struct_timeval,
-		[STRUCT_TIMEZONE] = print_struct_timezone,
-		[STRUCT_TIMESPEC] = print_struct_timespec,
-		[STRUCT_SHMID] = print_ptr,
-		[STRUCT_SOCKADDR] = print_ptr,
-		[STRUCT_MSGHDR] = print_ptr,
-		[STRUCT_RUSAGE] = print_struct_rusage,
-		[STRUCT_UTSNAME] = print_struct_utsusage,
-		[STRUCT_SEMBUF] = print_struct_sembuf,
-	};
-//		[STRUCT_MSGID]
-//		[STRUCT_LINUX_DIR]
-//		[STRUCT_RLIMIT]
-//		[STRUCT_SYSINFO]
-//		[STRUCT_SIGINFO]
-//		[STRUCT_TMS]
-//		[STRUCT_SIGSTACK]
-//		[STRUCT_UTIMBUF]
-//		[STRUCT_USTAT]
-//		[STRUCT_STATFS]
-//		[STRUCT_SCHED_PARAM]
-//		[STRUCT_SYSCTL]
-//		[STRUCT_TIMEX]
-//		[STRUCT_KERNEL_SYM]
-//		[STRUCT_NFSCTL_ARG]
-//		[STRUCT_NFSCTL_RES]
-//		[STRUCT_STRBUF]
-//		[STRUCT_CPU_SET]
-//		[STRUCT_USER_DESC]
-//		[STRUCT_IO_EVENT]
-//		[STRUCT_IOCB]
-//		[STRUCT_LINUX_DIRENT64]
-//		[STRUCT_SIGEVENT]
-//		[STRUCT_ITIMERSPEC]
-//		[STRUCT_EPOLL_EVENT]
-//		[STRUCT_MQ_ATTR]
-//		[STRUCT_KEXEC_SEGMENT]
-//		[STRUCT_PERF_EVENT_ATTR]
-//		[STRUCT_MMSGHDR]
-//		[STRUCT_FILE_HANDLE]
-//		[STRUCT_GETCPU_CACHE]
-//		[STRUCT_SCHED_ATTR]
-//		[STRUCT_STATX]
-//		[STRUCT_PTREGS]
-//		[STRUCT_POLLFD]
-//		[STRUCT_ROBUST_LIST_HEAD]
-//		[STRUCT_OLDKERNELSTAT]
-//		[STRUCT_VM86]
-//		[STRUCT_VM86PLUS]
-//		[STRUCT_NEWUTSNAME]
-//	};
-	if (flag < STRUCT_MSGID)
+	if (flag <= STRUCT_NEWUTSNAME)
 		return f[flag](child, value);
 	return 0;
 }

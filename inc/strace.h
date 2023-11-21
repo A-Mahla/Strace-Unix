@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/14 01:37:25 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/21 04:32:19 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/21 22:43:39 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,26 +26,38 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
-# include <sys/stat.h>
-# include <sys/types.h>
-# include <sys/ptrace.h>
 # include <unistd.h>
 # include <elf.h>
 # include <errno.h>
 # include <signal.h>
 # include <fcntl.h>
-# include <sys/uio.h>
-# include <sys/user.h>
 # include <stdbool.h>
+# include <sched.h>
+# include <ctype.h>
+# include <utime.h>
+# include <time.h>
+# include <mqueue.h>
+# include <linux/perf_event.h>
+# include <sys/uio.h>
+# include <poll.h>
+# include <sys/user.h>
 # include <sys/wait.h>
 # include <sys/mman.h>
 # include <sys/uio.h>
-# include <ctype.h>
+# include <sys/stat.h>
+# include <sys/types.h>
+# include <sys/ptrace.h>
 # include <sys/time.h>
 # include <sys/socket.h>
 # include <sys/resource.h>
 # include <sys/utsname.h>
 # include <sys/sem.h>
+# include <sys/sysinfo.h>
+# include <sys/msg.h>
+# include <sys/wait.h>
+# include <sys/times.h>
+# include <sys/vfs.h>
+# include <sys/epoll.h>
 # include "syscall_32.h"
 # include "syscall_64.h"
 # include "signals.h"
