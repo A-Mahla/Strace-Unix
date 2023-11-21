@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 23:57:49 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/20 20:52:51 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/21 02:29:08 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,11 @@ void	print_syscall64(struct syscall_s syscall,
 //	TO DELETE AFTER SIGNAL HANDLING
 	if (!is_start && strcmp(syscall.name, "execve") == 0)
 		is_start = true;
-	else if (!is_start)
+	if (!is_start)
 		return;
 /////////////////
+	if (regs->orig_rax >= NB_SYSCALL_64)
+		return;
 	if ((is_ret && !is_execve_or_exit(syscall.name))
 		|| (!is_ret && is_execve_or_exit(syscall.name))
 	) {
@@ -107,6 +109,8 @@ void	print_syscall32(struct syscall_s syscall,
 	else if (!is_start)
 		return;
 /////////////////
+	if (regs->orig_eax >= NB_SYSCALL_32 || strcmp(syscall.name, "no_syscall") == 0)
+		return;
 	if (is_ret)
 		dprintf(2, " => %ld\n", regs->eax);
 	else
