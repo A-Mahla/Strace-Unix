@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/17 18:00:59 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/20 03:37:03 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/21 01:41:35 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,20 @@
 # include "strace.h"
 
 
-static uint8_t	read_data_from_memory(pid_t child, unsigned long long int value,
+static uint32_t	read_data_from_memory(pid_t child, unsigned long long int value,
 	int size, void *local_buffer)
 {
-	int8_t				ret;
+	int32_t				ret = 0;
 	const struct iovec	local = {.iov_base = local_buffer, .iov_len = size};
 	const struct iovec	remote = {.iov_base = (void *)value, .iov_len = size};
 
 	if ((ret = process_vm_readv(child, &local, 1, &remote, 1, 0)) < 0) {
-		perror("ft_strace: process_vm_readv");
-		exit(1);
+//		perror("ft_strace: process_vm_readv");
+//		exit(1);
+		return 0;
 	}
-	if (ret < size)
-		((char *)local_buffer)[ret] = '\0';
+//	if (ret < size)
+//		((char *)local_buffer)[ret] = '\0';
 	return ret;
 }
 
@@ -74,8 +75,8 @@ static uint32_t	print_str(pid_t child, unsigned long long int value)
 {
 	char		buffer[BUFFER_SIZE] = {0};
 	uint32_t	ret = 0;
-	int8_t		i = 0;
-	int8_t		size;
+	int32_t		i = 0;
+	int32_t		size;
 
 	if (value == 0) {
 		return dprintf(2, "NULL");
@@ -83,7 +84,7 @@ static uint32_t	print_str(pid_t child, unsigned long long int value)
 		size = read_data_from_memory(child, value, BUFFER_SIZE, buffer);
 		ret += dprintf(2, "\"");
 		while ((isprint(*buffer) && buffer[i] && i < size)
-			|| (!isprint(*buffer) && i < size)
+			|| (*buffer && !isprint(*buffer) && i < size)
 		) {
 			if (isprint(buffer[i]))
 				ret += dprintf(2, "%c", buffer[i]);
@@ -312,7 +313,7 @@ static uint32_t	print_offset(__unused pid_t child, unsigned long long int value)
 
 static uint32_t	print_argv(pid_t child, unsigned long long int value)
 {
-	char		*argv[1];
+	char		*argv = NULL;
 	uint32_t	ret = 0;
 	int32_t		i = 0;
 
@@ -320,12 +321,12 @@ static uint32_t	print_argv(pid_t child, unsigned long long int value)
 	if (value == 0) {
 		ret += dprintf(2, "NULL");
 	} else {
-		read_data_from_memory(child, value, sizeof(char *), argv);
-		while (*argv) {
+		read_data_from_memory(child, value, sizeof(char *), &argv);
+		while (argv) {
 		i += 8;
-		ret += print_str(child, (unsigned long long int)*argv);
-		read_data_from_memory(child, value + i, sizeof(char *), argv);
-		if (*argv)
+		ret += print_str(child, (unsigned long long int)argv);
+		read_data_from_memory(child, value + i, sizeof(char *), &argv);
+		if (argv)
 			ret += dprintf(2, ", ");
 		}
 	}
@@ -336,20 +337,131 @@ static uint32_t	print_argv(pid_t child, unsigned long long int value)
 
 static uint32_t	print_envp(__unused pid_t child, unsigned long long int value)
 {
-	char		*envp[1];
+	char		*envp = NULL;
 	uint32_t	ret = 0;
-	int			i = 0;
-	int			y = 0;
+	uint32_t	i = 0;
+	uint32_t	y = 0;
 
 	ret += print_ptr(child, value);
-	read_data_from_memory(child, value, sizeof(char *), envp);
-	while (*envp) {
+	read_data_from_memory(child, value, sizeof(char *), &envp);
+	while (envp) {
 		i++;
 		y += 8;
-		read_data_from_memory(child, value + y, sizeof(char *), envp);
+		read_data_from_memory(child, value + y, sizeof(char *), &envp);
 	}
 	ret += dprintf(2, " /* %d vars */", i);
 	return ret;
+}
+
+
+static uint32_t print_struct_stat(pid_t child, unsigned long long int value)
+{
+	struct stat	buffer;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct stat), &buffer) != sizeof(struct stat))
+		return 0;
+	return dprintf(2, "{st_dev=%#lo, st_size=%ld, ...}", buffer.st_dev, buffer.st_ino);
+}
+
+
+static uint32_t print_struct_sigact(pid_t child, unsigned long long int value)
+{
+	struct sigaction	buffer;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct sigaction), &buffer) != sizeof(struct sigaction))
+		return 0;
+	return dprintf(2, "{sa_handler=%p, ...}", buffer.sa_handler);
+}
+
+
+static uint32_t print_struct_iovec(pid_t child, unsigned long long int value)
+{
+	struct iovec	buffer;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct iovec), &buffer) != sizeof(struct iovec))
+		return 0;
+	return dprintf(2, "{iov_base=%p, iov_len=%ld}", buffer.iov_base, buffer.iov_len);
+}
+
+
+static uint32_t print_struct_timeval(pid_t child, unsigned long long int value)
+{
+	struct timeval	buffer;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct timeval), &buffer) != sizeof(struct timeval))
+		return 0;
+	return dprintf(2, "{tv_sec=%ld, tv_usec=%ld}", buffer.tv_sec, buffer.tv_usec);
+}
+
+
+static uint32_t print_struct_timezone(pid_t child, unsigned long long int value)
+{
+	struct timezone	buffer;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct timezone), &buffer) != sizeof(struct timezone))
+		return 0;
+	return dprintf(2, "{tz_minuteswest=%d, tz_dsttime=%d}", buffer.tz_minuteswest, buffer.tz_dsttime);
+}
+
+
+static uint32_t print_struct_timespec(pid_t child, unsigned long long int value)
+{
+	struct timespec	buffer;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct timespec), &buffer) != sizeof(struct timespec))
+		return 0;
+	return dprintf(2, "{tv_sec=%ld, tv_nsec=%ld}", buffer.tv_sec, buffer.tv_nsec);
+}
+
+
+static uint32_t print_struct_rusage(pid_t child, unsigned long long int value)
+{
+	struct rusage	buffer;
+	uint32_t		ret = 0;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct rusage), &buffer) != sizeof(struct rusage))
+		return 0;
+	return dprintf(2, "{ru_utime={tv_sec=%ld, tv_usec=%ld}, ru_stime={tv_sec=%ld, tv_usec=%ld}",
+		buffer.ru_utime.tv_sec, buffer.ru_utime.tv_usec, buffer.ru_stime.tv_sec, buffer.ru_stime.tv_usec);
+	return ret;
+}
+
+
+static uint32_t print_struct_utsusage(pid_t child, unsigned long long int value)
+{
+	struct utsname	buffer;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct utsname), &buffer) != sizeof(struct utsname))
+		return 0;
+	return dprintf(2, "{sysname=\"%s\", nodename=\"%s\", ...}", buffer.sysname, buffer.nodename);
+}
+
+
+static uint32_t print_struct_sembuf(pid_t child, unsigned long long int value)
+{
+	struct sembuf	buffer;
+
+	if (value == 0)
+		return dprintf(2, "NULL");
+	if (read_data_from_memory(child, value, sizeof(struct sembuf), &buffer) != sizeof(struct sembuf))
+		return 0;
+	return dprintf(2, "[{sem_num=%d, sem_op=%d, sem_flg=%d}]", buffer.sem_num, buffer.sem_op, buffer.sem_flg);
 }
 
 
@@ -376,24 +488,23 @@ uint32_t	print_type(enum type_e flag, pid_t child, unsigned long long int value)
 		[ID_T] = print_id,
 		[ARGV] = print_argv,
 		[ENVP] = print_envp,
+		[VARARGS] = print_str,
+		[STRUCT_STAT] = print_struct_stat,
+		[STRUCT_SIGACT] = print_struct_sigact,
+		[STRUCT_SIGSET] = print_ptr,
+		[STRUCT_SIGINF] = print_ptr,
+		[STRUCT_IOVEC] = print_struct_iovec,
+		[STRUCT_FDSET] = print_ptr,
+		[STRUCT_TIMEVAL] = print_struct_timeval,
+		[STRUCT_TIMEZONE] = print_struct_timezone,
+		[STRUCT_TIMESPEC] = print_struct_timespec,
+		[STRUCT_SHMID] = print_ptr,
+		[STRUCT_SOCKADDR] = print_ptr,
+		[STRUCT_MSGHDR] = print_ptr,
+		[STRUCT_RUSAGE] = print_struct_rusage,
+		[STRUCT_UTSNAME] = print_struct_utsusage,
+		[STRUCT_SEMBUF] = print_struct_sembuf,
 	};
-//		[VARARGS]
-//		[STRUCT_STAT] // Struct types
-//		[STRUCT_POLL]
-//		[STRUCT_SIGACT]
-//		[STRUCT_SIGSET]
-//		[STRUCT_SIGINF]
-//		[STRUCT_IOVEC]
-//		[STRUCT_FDSET]
-//		[STRUCT_TIMEVAL]
-//		[STRUCT_TIMEZONE]
-//		[STRUCT_TIMESPEC]
-//		[STRUCT_SHMID]
-//		[STRUCT_SOCKADDR]
-//		[STRUCT_MSGHDR]
-//		[STRUCT_RUSAGE]
-//		[STRUCT_UTSNAME]
-//		[STRUCT_SEMBUF]
 //		[STRUCT_MSGID]
 //		[STRUCT_LINUX_DIR]
 //		[STRUCT_RLIMIT]
@@ -435,10 +546,7 @@ uint32_t	print_type(enum type_e flag, pid_t child, unsigned long long int value)
 //		[STRUCT_VM86PLUS]
 //		[STRUCT_NEWUTSNAME]
 //	};
-//	if ((arch ==  ELFCLASS32 && flag < NB_SYSCALL_32)
-//			|| (arch ==  ELFCLASS64 && flag < NB_SYSCALL_64))
-//		f[flag](value, arch);
-	if (flag < VARARGS)
+	if (flag < STRUCT_MSGID)
 		return f[flag](child, value);
 	return 0;
 }

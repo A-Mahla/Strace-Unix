@@ -1,34 +1,21 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <keyutils.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <time.h>
 
 int main() {
-    key_serial_t key_id, keyring_id;
+    int semid; // Obtain the semaphore ID somehow
+    struct sembuf sops[1];
 
-    // Creating a key
-    key_id = keyctl(KEYCTL_JOIN_SESSION_KEYRING, "my_session_keyring");
-    if (key_id < 0) {
-        perror("keyctl");
-        exit(EXIT_FAILURE);
+    sops[0].sem_num = 0; // Semaphore number
+    sops[0].sem_op = -1; // Decrement by 1
+    sops[0].sem_flg = SEM_UNDO; // Flag for keeping track of adjustments
+
+    int result = semop(semid, sops, 1);
+
+    if (result == -1) {
+        // Handle error
     }
-    printf("Created key ID: %d\n", key_id);
-
-    // Adding a key to a keyring
-    keyring_id = keyctl(KEYCTL_JOIN_SESSION_KEYRING, "my_keyring");
-    if (keyring_id < 0) {
-        perror("keyctl");
-        exit(EXIT_FAILURE);
-    }
-    printf("Created keyring ID: %d\n", keyring_id);
-
-    // Setting expiration time for a key
-    int expiry_time = 100; // Set expiry time to 100 seconds
-    keyctl(KEYCTL_EXPIRE, key_id, expiry_time);
-
-    // More operations can be performed using keyctl() with various flags
-    // ...
 
     return 0;
 }
+

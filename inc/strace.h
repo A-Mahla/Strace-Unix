@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/14 01:37:25 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/20 03:38:49 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/21 01:40:31 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,11 @@
 # include <sys/mman.h>
 # include <sys/uio.h>
 # include <ctype.h>
+# include <sys/time.h>
+# include <sys/socket.h>
+# include <sys/resource.h>
+# include <sys/utsname.h>
+# include <sys/sem.h>
 # include "syscall_32.h"
 # include "syscall_64.h"
 # include "signals.h"
