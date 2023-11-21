@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 23:57:49 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/21 02:29:08 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/21 04:04:35 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,14 +51,13 @@ void	print_syscall64(struct syscall_s syscall,
 	struct user_regs_struct64 *regs, pid_t child, bool is_ret)
 {
 	uint32_t	ret = 0;
+
 //	TO DELETE AFTER SIGNAL HANDLING
 	if (!is_start && strcmp(syscall.name, "execve") == 0)
 		is_start = true;
 	if (!is_start)
 		return;
 /////////////////
-	if (regs->orig_rax >= NB_SYSCALL_64)
-		return;
 	if ((is_ret && !is_execve_or_exit(syscall.name))
 		|| (!is_ret && is_execve_or_exit(syscall.name))
 	) {
@@ -100,19 +99,51 @@ void	print_syscall64(struct syscall_s syscall,
 void	print_syscall32(struct syscall_s syscall,
 	struct user_regs_struct32 *regs, pid_t child, bool is_ret)
 {
-	(void)arch;
-	(void)is_ret;
-	(void)child;
+	uint32_t	ret = 0;
+
+	if (regs->orig_eax < NB_SYSCALL_32
+			&& strcmp(syscall.name, "no_syscall") == 0)
+		return;
 //	TO DELETE AFTER SIGNAL HANDLING
 	if (!is_start && strcmp(syscall.name, "execve") == 0)
 		is_start = true;
 	else if (!is_start)
 		return;
 /////////////////
-	if (regs->orig_eax >= NB_SYSCALL_32 || strcmp(syscall.name, "no_syscall") == 0)
-		return;
-	if (is_ret)
-		dprintf(2, " => %ld\n", regs->eax);
-	else
-		dprintf(2, "%s()", syscall.name);
+
+	if ((is_ret && !is_execve_or_exit(syscall.name))
+		|| (!is_ret && is_execve_or_exit(syscall.name))
+	) {
+		ret += dprintf(2, "%s(", syscall.name);
+		for (unsigned int i = 0; i < syscall.argc; i++) {
+			if (syscall.type_args[i] == 0)
+				break;
+			if (i == 0)
+				ret += print_type(syscall.type_args[i], child, regs->ebx);
+			else if (i == 1)
+				ret += print_type(syscall.type_args[i], child, regs->ecx);
+			else if (i == 2)
+				ret += print_type(syscall.type_args[i], child, regs->edx);
+			else if (i == 3)
+				ret += print_type(syscall.type_args[i], child, regs->esi);
+			else if (i == 4)
+				ret += print_type(syscall.type_args[i], child, regs->edi);
+			else if (i == 5)
+				ret += print_type(syscall.type_args[i], child, regs->ebp);
+			if (i < syscall.argc - 1)
+				ret += dprintf(2, ", ");
+		}
+		ret += dprintf(2, ")");
+		padding(ret);
+	}
+	if (is_ret) {
+		dprintf(2, " = ");
+		if (syscall.type_ret == INT && (int)regs->eax < 0) {
+			print_type(syscall.type_ret, child, -1);
+			print_errno((int)regs->eax * -1);
+		} else {
+			print_type(syscall.type_ret, child, regs->eax);
+		}
+		dprintf(2, "\n");
+	}
 }

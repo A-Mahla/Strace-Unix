@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/14 01:35:35 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/20 01:59:10 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/21 04:36:14 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,25 +25,29 @@ int8_t	child(char *filename, char **av, char **envp)
 
 static void	strace(char **av, char **envp)
 {
-	char	*filename;
-	uint8_t	class;
-	pid_t	pid;
+	struct stat	statbuf;
+	char		*filename;
+	pid_t		pid;
 
 	filename = path_finding(*av, envp);
 	if (!filename)
 		goto err;
-	class = arch(filename, *av);
+	if (stat(filename, &statbuf) < 0) {
+		dprintf(2, "strace: Can't stat '%s': %s\n", *av, strerror(errno));
+		goto exit_failure;
+	}
 	if ((pid = fork()) < 0)
 		goto err;
 	if (pid == 0) {
 		child(filename, av, envp);
 	} else {
 		free(filename);
-		process(pid, class);
+		process(pid);
 	}
 	return;
 err:
 	dprintf(2, "strace: %s: %s\n", av[0], strerror(errno));
+exit_failure:
 	if (filename)
 		free(filename);
 	exit(1);
