@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/17 18:00:59 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/21 23:07:12 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/24 10:40:32 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,6 @@ static uint32_t	print_flag_open(__unused pid_t child,
 
 static uint32_t	print_flag_access(__unused pid_t child, unsigned long long int value)
 {
-	bool		first = true;
 	uint32_t	ret = 0;
 	static const struct type_flag	flags[] = {
 		[ 0] = {.flag = R_OK, .name = "R_OK"},
@@ -158,13 +157,7 @@ static uint32_t	print_flag_access(__unused pid_t child, unsigned long long int v
 	{
 		if (((int)value & flags[i].flag)
 			|| (flags[i].flag == 0 && !((int)value & flags[i].flag) ))
-		{
-			if (!first)
-				ret += dprintf(2, "|");
-			else
-				first = false;
-			ret += dprintf(2, "%s", flags[i].name);
-		}
+			return dprintf(2, "%s", flags[i].name);
 	}
 	return ret;
 }

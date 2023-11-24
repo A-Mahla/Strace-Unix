@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 23:57:49 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/21 04:43:11 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/24 10:39:22 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,17 @@
 # include "strace.h"
 
 
-static bool	is_start = false;
+bool	is_start = false;
 
 
 static void	print_errno(int code)
 {
 	static const char	*err[] = ERRNO_CODE;
 
-	dprintf(2, " %s (%s)", err[code], strerror(code));
+	if (code == 516)
+		dprintf(2, " %s (Interrupted by signal)", err[code]);
+	else
+		dprintf(2, " %s (%s)", err[code], strerror(code));
 }
 
 
@@ -47,21 +50,27 @@ static void	padding(uint32_t ret)
 }
 
 
+static bool	is_start_tracee(const char *name)
+{
+	if (!is_start && strcmp(name, "execve") == 0)
+		is_start = true;
+	if (!is_start)
+		return false;
+	return true;
+}
+
+
 void	print_syscall64(struct syscall_s syscall,
 	struct user_regs_struct64 *regs, pid_t child, bool is_ret)
 {
 	uint32_t	ret = 0;
 
-//	TO DELETE AFTER SIGNAL HANDLING
-	if (!is_start && strcmp(syscall.name, "execve") == 0)
-		is_start = true;
-	if (!is_start)
+	if (!is_start_tracee(syscall.name))
 		return;
-/////////////////
 	if ((is_ret && !is_execve_or_exit(syscall.name))
 		|| (!is_ret && is_execve_or_exit(syscall.name))
 	) {
-		ret += dprintf(2, "%s(", syscall.name);
+		ret += dprintf(2, "\r%s(", syscall.name);
 		for (unsigned int i = 0; i < syscall.argc; i++) {
 			if (syscall.type_args[i] == 0)
 				break;
@@ -101,20 +110,12 @@ void	print_syscall32(struct syscall_s syscall,
 {
 	uint32_t	ret = 0;
 
-	if (regs->orig_eax < NB_SYSCALL_32
-			&& strcmp(syscall.name, "no_syscall") == 0)
+	if (strcmp(syscall.name, "no_syscall") || !is_start_tracee(syscall.name) == 0)
 		return;
-//	TO DELETE AFTER SIGNAL HANDLING
-	if (!is_start && strcmp(syscall.name, "execve") == 0)
-		is_start = true;
-	else if (!is_start)
-		return;
-/////////////////
-
 	if ((is_ret && !is_execve_or_exit(syscall.name))
 		|| (!is_ret && is_execve_or_exit(syscall.name))
 	) {
-		ret += dprintf(2, "%s(", syscall.name);
+		ret += dprintf(2, "\r%s(", syscall.name);
 		for (unsigned int i = 0; i < syscall.argc; i++) {
 			if (syscall.type_args[i] == 0)
 				break;

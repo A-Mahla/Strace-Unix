@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 01:37:20 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/21 16:04:16 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/24 12:10:28 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,31 @@
 # include "strace.h"
 
 
-static int8_t	wait_signal(pid_t child, int *status)
+static void	wait_signal(pid_t child, int *status, bool is_ret)
 {
 	waitpid(child, status, 0);
-	if (WIFEXITED(*status) || WIFSIGNALED(*status))
-		return EXITED;
-	return SUCCESS;
+
+
+	if (WIFEXITED(*status)) {
+		if (is_ret)
+			dprintf(2, " = ?\n");
+		dprintf(2, "+++ exited with %d +++\n", WEXITSTATUS(*status));
+		exit(WEXITSTATUS(*status));
+	}
+
+	if (WIFSIGNALED(*status)) {
+		dprintf(2, "+++ killed by %s +++\n\n", find_signal(WTERMSIG(*status)));
+		exit(WTERMSIG(*status));
+	}
+
+	if (WIFSTOPPED(*status)) {
+		if (WSTOPSIG(*status) == SIGTRAP)
+			return;
+		print_signal_struct(child);
+		unblock_signals();
+//		exit(WSTOPSIG(*status) + 128);
+		raise(WSTOPSIG(*status));
+	}
 }
 
 
@@ -89,17 +108,14 @@ static void	loop(pid_t child)
 
 	iov.iov_base = &regs;
 	iov.iov_len = sizeof(regs);
-	if (wait_signal(child, &status) == EXITED)
-		return;
+	wait_signal(child, &status, false);
 	while (1) {
 		next_syscall(child);
-		if (wait_signal(child, &status) == EXITED)
-            break;
-		getregset(0, child, &regs, &iov, syscall64, syscall32);
+		wait_signal(child, &status, false);
+		getregset(false, child, &regs, &iov, syscall64, syscall32);
 		next_syscall(child);
-		if (wait_signal(child, &status) == EXITED)
-            break;
-		getregset(1, child, &regs, &iov, syscall64, syscall32);
+		wait_signal(child, &status, true);
+		getregset(true, child, &regs, &iov, syscall64, syscall32);
 	}
 }
 
@@ -114,6 +130,6 @@ void	process(pid_t child)
 		perror("ft_strace: ptrace PTRACE_INTERRUPT");
 		exit(1);
 	}
+	block_signals();
 	loop(child);
-	dprintf(2, " = ?\n");
 }

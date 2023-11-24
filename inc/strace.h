@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/14 01:37:25 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/21 22:43:39 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/24 11:39:43 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,11 +71,18 @@ void		print_syscall32(struct syscall_s syscall,
 				struct user_regs_struct32 *regs, pid_t child, bool is_ret);
 uint32_t	print_type(enum type_e flag, pid_t child, unsigned long long int value);
 void		process(pid_t child);
+char		*find_signal(int signal);
+void		block_signals(void);
+void		unblock_signals(void);
+void		print_signal_struct(pid_t child);
 char		*path_finding(const char *filename, char **envp);
 uint8_t		arch(char *filename, char *av);
 char		**split(char const *s, char c);
 void		free_split(char **split);
 void		putnbr(long long int nb);
+
+
+extern bool	is_start;
 
 
 #endif
