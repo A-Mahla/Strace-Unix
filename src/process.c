@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 01:37:20 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/24 12:10:28 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/25 00:05:26 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,27 +17,19 @@
 static void	wait_signal(pid_t child, int *status, bool is_ret)
 {
 	waitpid(child, status, 0);
-
-
 	if (WIFEXITED(*status)) {
 		if (is_ret)
 			dprintf(2, " = ?\n");
 		dprintf(2, "+++ exited with %d +++\n", WEXITSTATUS(*status));
 		exit(WEXITSTATUS(*status));
-	}
-
-	if (WIFSIGNALED(*status)) {
+	} else if (WIFSIGNALED(*status)) {
 		dprintf(2, "+++ killed by %s +++\n\n", find_signal(WTERMSIG(*status)));
 		exit(WTERMSIG(*status));
-	}
-
-	if (WIFSTOPPED(*status)) {
+	} else if (WIFSTOPPED(*status)) {
 		if (WSTOPSIG(*status) == SIGTRAP)
 			return;
 		print_signal_struct(child);
-		unblock_signals();
-//		exit(WSTOPSIG(*status) + 128);
-		raise(WSTOPSIG(*status));
+		exit(WSTOPSIG(*status) + 128);
 	}
 }
 

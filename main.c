@@ -7,7 +7,10 @@ int main() {
 //		buf[i] = 9;
 //	}
 //	raise(SIGINT);
-//	raise(SIGHUP);
-	raise(SIGILL);
-	sleep(3);
+	raise(SIGHUP);
+//	raise(SIGILL);
+//	sleep(3);
+//    unsigned char illegal_instruction[] = {0xFF, 0xFF, 0xFF, 0xFF}; // Invalid opcode
+//    void (*func)() = (void (*)())illegal_instruction;
+//    func();
 }

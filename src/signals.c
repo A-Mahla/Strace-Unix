@@ -6,12 +6,15 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/23 22:41:41 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/24 12:28:23 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/25 00:06:13 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 # include "strace.h"
+
+
+static sigset_t	signal_mask;
 
 
 char	*find_signal(int signal)
@@ -38,19 +41,19 @@ const char	*find_sicode(int signal, int si_code)
 	 static struct type_flag	poll_si_codes[] = POLL_SI_CODE;
 	 struct type_flag			*si_codes = default_si_codes;
 
-	if (signal == SIGILL)
+	if (signal == SIGILL && si_code > 0)
 		si_codes = ill_si_codes;
-	else if (signal == SIGFPE)
+	else if (signal == SIGFPE && si_code > 0)
 		si_codes = fpe_si_codes;
-	else if (signal == SIGSEGV)
+	else if (signal == SIGSEGV && si_code > 0)
 		si_codes = segv_si_codes;
-	else if (signal == SIGBUS)
+	else if (signal == SIGBUS && si_code > 0)
 		si_codes = bus_si_codes;
-	else if (signal == SIGTRAP)
+	else if (signal == SIGTRAP && si_code > 0)
 		si_codes = trap_si_codes;
-	else if (signal == SIGCHLD)
+	else if (signal == SIGCHLD && si_code > 0)
 		si_codes = cld_si_codes;
-	else if (signal == SIGPOLL)
+	else if (signal == SIGPOLL && si_code > 0)
 		si_codes = poll_si_codes;
 	for (int i = 0; si_codes[i].name; i++) {
 		if ((int)si_codes[i].flag == si_code)
@@ -62,8 +65,6 @@ const char	*find_sicode(int signal, int si_code)
 
 void	block_signals(void)
 {
-	sigset_t	signal_mask;
-
 	sigemptyset(&signal_mask);
 	sigaddset(&signal_mask, SIGINT);
 	sigaddset(&signal_mask, SIGTERM);
@@ -86,8 +87,6 @@ void	block_signals(void)
 
 void	unblock_signals(void)
 {
-	sigset_t	signal_mask;
-
 	sigemptyset(&signal_mask);
 	sigprocmask(SIG_SETMASK, &signal_mask, NULL);
 }
@@ -99,15 +98,17 @@ void	print_signal_struct(pid_t child)
 	char		*signame;
 
 	if (ptrace(PTRACE_GETSIGINFO, child, 0, &sig) < 0) {
-		perror("ft_strace: ptrace PTRACE_SYSCALL");
+		perror("ft_strace: ptrace PTRACE_GETSIGINFO");
 		exit(1);
 	}
 	signame = find_signal(sig.si_signo);
-	if (sig.si_code == SI_TKILL) {
+	if (sig.si_code == SI_KERNEL) {
+		dprintf(1, "strace: Process %d detached\n", child);
+	} else {
 		dprintf(2, "--- %1$s {si_signo=%1$s, si_code=%2$s, si_pid=%3$d, si_uid=%4$d} ---\n",
 			signame, find_sicode(sig.si_signo, sig.si_code), sig.si_pid, sig.si_uid);
 		dprintf(1, "+++ killed by %1$s +++\n", signame);
-	} else {
-		dprintf(1, "strace: Process %d detached\n", child);
 	}
+	if (sigismember(&signal_mask, sig.si_signo) == 1)
+		raise(sig.si_signo);
 }

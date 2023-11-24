@@ -41,16 +41,15 @@
 }
 
 # define SI_CODE { \
-	[0] = {0, ""}, \
-	[1] = {SI_USER, "SI_USER"}, \
-	[2] = {SI_KERNEL, "SI_KERNEL"}, \
-	[3] = {SI_QUEUE, "SI_QUEUE"}, \
-	[4] = {SI_TIMER, "SI_TIMER"}, \
-	[5] = {SI_MESGQ, "SI_MESGQ"}, \
-	[6] = {SI_ASYNCIO, "SI_ASYNCIO"}, \
-	[7] = {SI_SIGIO, "SI_SIGIO"}, \
-	[8] = {SI_TKILL, "SI_TKILL"}, \
-	[9] = {0, NULL} \
+	[0] = {SI_USER, "SI_USER"}, \
+	[1] = {SI_KERNEL, "SI_KERNEL"}, \
+	[2] = {SI_QUEUE, "SI_QUEUE"}, \
+	[3] = {SI_TIMER, "SI_TIMER"}, \
+	[4] = {SI_MESGQ, "SI_MESGQ"}, \
+	[5] = {SI_ASYNCIO, "SI_ASYNCIO"}, \
+	[6] = {SI_SIGIO, "SI_SIGIO"}, \
+	[7] = {SI_TKILL, "SI_TKILL"}, \
+	[8] = {0, NULL} \
 }
 
 # define ILL_SI_CODE { \
