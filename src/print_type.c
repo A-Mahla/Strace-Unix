@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/17 18:00:59 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/24 10:40:32 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/25 22:57:42 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,8 @@ static uint32_t	read_data_from_memory(pid_t child, unsigned long long int value,
 	const struct iovec	remote = {.iov_base = (void *)value, .iov_len = size};
 
 	if ((ret = process_vm_readv(child, &local, 1, &remote, 1, 0)) < 0) {
-//		perror("ft_strace: process_vm_readv");
-//		exit(1);
+		perror("ft_strace: process_vm_readv");
+		exit(1);
 		return 0;
 	}
 	return ret;
