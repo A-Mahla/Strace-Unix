@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 23:57:49 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/24 10:39:22 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/25 03:46:42 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,8 @@ static bool	is_execve_or_exit(const char *name)
 		return true;
 	if (strstr(name, "exit") != NULL)
 		return true;
+	if (strstr(name, "kill") != NULL)
+		return true;
 	return false;
 }
 
@@ -52,8 +54,10 @@ static void	padding(uint32_t ret)
 
 static bool	is_start_tracee(const char *name)
 {
-	if (!is_start && strcmp(name, "execve") == 0)
+	if (!is_start && strcmp(name, "execve") == 0) {
+		block_signals();
 		is_start = true;
+	}
 	if (!is_start)
 		return false;
 	return true;
@@ -94,7 +98,7 @@ void	print_syscall64(struct syscall_s syscall,
 	}
 	if (is_ret) {
 		dprintf(2, " = ");
-		if (syscall.type_ret == INT && (int)regs->rax < 0) {
+		if ((syscall.type_ret == INT || syscall.type_ret == LONG) && (int)regs->rax < 0) {
 			print_type(syscall.type_ret, child, -1);
 			print_errno((int)regs->rax * -1);
 		} else {
@@ -139,7 +143,7 @@ void	print_syscall32(struct syscall_s syscall,
 	}
 	if (is_ret) {
 		dprintf(2, " = ");
-		if (syscall.type_ret == INT && (int)regs->eax < 0) {
+		if ((syscall.type_ret == INT || syscall.type_ret == LONG) && (int)regs->eax < 0) {
 			print_type(syscall.type_ret, child, -1);
 			print_errno((int)regs->eax * -1);
 		} else {

@@ -278,8 +278,8 @@
 		[270] = {"pselect6", 6, {INT, PTR, PTR, PTR, STRUCT_TIMESPEC, PTR}, INT},                          \
 		[271] = {"ppoll", 5, {STRUCT_POLLFD, ULONG, STRUCT_TIMESPEC, STRUCT_SIGSET, ULONG, 0}, INT},       \
 		[272] = {"unshare", 1, {INT, 0, 0, 0, 0, 0}, INT},                                                 \
-		[273] = {"set_robust_list", 2, {STRUCT_ROBUST_LIST_HEAD, ULONG, 0, 0, 0, 0}, LONG},                \
-		[274] = {"get_robust_list", 3, {INT, STRUCT_ROBUST_LIST_HEAD, ULONG, 0, 0, 0}, LONG},              \
+		[273] = {"set_robust_list", 2, {PTR, ULONG, 0, 0, 0, 0}, LONG},                \
+		[274] = {"get_robust_list", 3, {INT, PTR, ULONG, 0, 0, 0}, LONG},              \
 		[275] = {"splice", 6, {INT, PTR, INT, PTR, ULONG, ULONG}, LONG},                                   \
 		[276] = {"tee", 4, {INT, INT, ULONG, ULONG, 0, 0}, LONG},                                          \
 		[277] = {"sync_file_range", 4, {INT, OFF, ULONG, ULONG, 0, 0}, LONG},                              \

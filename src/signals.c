@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/23 22:41:41 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/25 00:06:13 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/25 03:33:09 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ char	*find_signal(int signal)
 		if (i == signal)
 			return signals[i];
 	}
-	return NULL;
+	return "SIGRT_2";
 }
 
 
@@ -92,23 +92,63 @@ void	unblock_signals(void)
 }
 
 
-void	print_signal_struct(pid_t child)
+void	stopped_process(pid_t child, bool is_ret)
+{
+	int	status;
+
+	next_syscall(child);
+	wait_signal(child, &status, is_ret);
+}
+
+
+void	print_signal_struct(siginfo_t sig, char *signame)
+{
+	dprintf(2, "--- %1$s {si_signo=%1$s, si_code=%2$s, ",
+		signame, find_sicode(sig.si_signo, sig.si_code));
+	if (sig.si_signo == SIGSEGV && sig.si_code > 0)
+		dprintf(2, "si_addr=%p} ---\n", sig.si_addr);
+	else if (sig.si_signo == SIGCHLD && sig.si_code > 0)
+		dprintf(2, "si_status=%d, si_utime=%ld, si_stime=%ld} ---\n",
+			sig.si_status, sig.si_utime, sig.si_stime);
+	else
+		dprintf(2, "si_pid=%d, si_uid=%d} ---\n", sig.si_pid, sig.si_uid);
+	if (sig.si_signo == SIGSTOP || sig.si_signo == SIGTSTP
+		|| sig.si_signo == SIGTTIN)
+		dprintf(1, "+++ stopped by %s +++\n", signame);
+	else if (sig.si_signo != SIGCHLD && sig.si_signo != SIGCONT
+		&& sig.si_signo != SIGURG && sig.si_signo != SIGWINCH)
+		dprintf(1, "+++ killed by %s +++\n", signame);
+}
+
+
+void	print_signal(pid_t child, int status, bool is_ret)
 {
 	siginfo_t	sig;
 	char		*signame;
 
-	if (ptrace(PTRACE_GETSIGINFO, child, 0, &sig) < 0) {
+	if (WTERMSIG(status) == SIGKILL) {
+		if (is_ret)
+			dprintf(2, " = ?\n");
+		dprintf(1, "+++ killed by SIGKILL +++\n");
+		unblock_signals();
+		raise(WTERMSIG(status));
+	} else if (ptrace(PTRACE_GETSIGINFO, child, 0, &sig) < 0) {
 		perror("ft_strace: ptrace PTRACE_GETSIGINFO");
 		exit(1);
 	}
 	signame = find_signal(sig.si_signo);
-	if (sig.si_code == SI_KERNEL) {
+	if (sig.si_signo == SIGTRAP && sig.si_code == 5)
+		return;
+	if (is_ret)
+		dprintf(2, " = ?\n");
+	if (sig.si_code == SI_KERNEL)
 		dprintf(1, "strace: Process %d detached\n", child);
-	} else {
-		dprintf(2, "--- %1$s {si_signo=%1$s, si_code=%2$s, si_pid=%3$d, si_uid=%4$d} ---\n",
-			signame, find_sicode(sig.si_signo, sig.si_code), sig.si_pid, sig.si_uid);
-		dprintf(1, "+++ killed by %1$s +++\n", signame);
-	}
-	if (sigismember(&signal_mask, sig.si_signo) == 1)
+	else
+		print_signal_struct(sig, signame);
+	unblock_signals();
+	if (sig.si_signo != SIGCHLD && sig.si_signo != SIGCONT
+		&& sig.si_signo != SIGURG && sig.si_signo != SIGWINCH)
 		raise(sig.si_signo);
+	else
+		stopped_process(child, is_ret);
 }

@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 01:37:20 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/25 00:05:26 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/25 03:29:46 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,27 +14,21 @@
 # include "strace.h"
 
 
-static void	wait_signal(pid_t child, int *status, bool is_ret)
+void	wait_signal(pid_t child, int *status, bool is_ret)
 {
 	waitpid(child, status, 0);
-	if (WIFEXITED(*status)) {
+	if (WIFEXITED(*status) && is_start) {
 		if (is_ret)
 			dprintf(2, " = ?\n");
 		dprintf(2, "+++ exited with %d +++\n", WEXITSTATUS(*status));
 		exit(WEXITSTATUS(*status));
-	} else if (WIFSIGNALED(*status)) {
-		dprintf(2, "+++ killed by %s +++\n\n", find_signal(WTERMSIG(*status)));
-		exit(WTERMSIG(*status));
-	} else if (WIFSTOPPED(*status)) {
-		if (WSTOPSIG(*status) == SIGTRAP)
-			return;
-		print_signal_struct(child);
-		exit(WSTOPSIG(*status) + 128);
+	} else if ((WIFSIGNALED(*status) || WIFSTOPPED(*status)) && is_start) {
+		print_signal(child, *status, is_ret);
 	}
 }
 
 
-static void	next_syscall(pid_t child)
+void	next_syscall(pid_t child)
 {
 	if (ptrace(PTRACE_SYSCALL, child, NULL, NULL) < 0) {
 		perror("ft_strace: ptrace PTRACE_SYSCALL");
@@ -122,6 +116,5 @@ void	process(pid_t child)
 		perror("ft_strace: ptrace PTRACE_INTERRUPT");
 		exit(1);
 	}
-	block_signals();
 	loop(child);
 }

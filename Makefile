@@ -6,7 +6,7 @@
 #    By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+       #
 #                                              +#+    +#+   +#+     +#+        #
 #    Created: 2023/10/17 02:01:51 by amahla  #+#      #+#  #+#     #+#         #
-#    Updated: 2023/11/23 23:42:45 by amahla ###       ########     ########    #
+#    Updated: 2023/11/25 00:10:05 by amahla ###       ########     ########    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,6 @@ SRC		:=	$(addprefix $(SRCDIR)/,	strace.c		\
 									path.c			\
 									signals.c		\
 									split.c			\
-									utils.c			\
 									)
 OBJ		:=	$(SRC:.c=.o)
 DEP 	:=	$(SRC:.c=.d)
