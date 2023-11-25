@@ -6,7 +6,7 @@
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/16 23:57:49 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/25 03:46:42 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/26 00:33:43 by amahla ###       ########     ########   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ void	print_syscall32(struct syscall_s syscall,
 {
 	uint32_t	ret = 0;
 
-	if (strcmp(syscall.name, "no_syscall") || !is_start_tracee(syscall.name) == 0)
+	if (strcmp(syscall.name, "no_syscall") == 0 || !is_start_tracee(syscall.name))
 		return;
 	if ((is_ret && !is_execve_or_exit(syscall.name))
 		|| (!is_ret && is_execve_or_exit(syscall.name))

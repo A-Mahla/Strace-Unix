@@ -77,7 +77,7 @@
 		[69] = {"msgsnd", 4, {INT, PTR, ULONG, INT, 0, 0}, INT},                                           \
 		[70] = {"msgrcv", 5, {INT, PTR, ULONG, ULONG, INT, 0}, ULONG},                                     \
 		[71] = {"msgctl", 3, {INT, INT, STRUCT_MSGID, 0, 0, 0}, INT},                                      \
-		[72] = {"fcntl", 3, {INT, INT, 0, 0, 0, 0}, INT},                                                  \
+		[72] = {"fcntl", 2, {INT, INT, 0, 0, 0, 0}, INT},                                                  \
 		[73] = {"flock", 2, {INT, INT, 0, 0, 0, 0}, INT},                                                  \
 		[74] = {"fsync", 1, {INT, 0, 0, 0, 0, 0}, INT},                                                    \
 		[75] = {"fdatasync", 1, {INT, 0, 0, 0, 0, 0}, INT},                                                \

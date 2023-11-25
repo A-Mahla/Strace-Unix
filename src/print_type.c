@@ -258,6 +258,7 @@ static uint32_t	print_trace_flags(__unused pid_t child, unsigned long long int v
 		[20] = {.flag = PTRACE_KILL, .name = "PTRACE_KILL"},
 		[21] = {.flag = PTRACE_ATTACH, .name = "PTRACE_ATTACH"},
 		[22] = {.flag = PTRACE_DETACH, .name = "PTRACE_DETACH"},
+		[23] = {.flag = PTRACE_GETREGSET, .name = "PTRACE_GETREGSET"},
 		
 	};
 
