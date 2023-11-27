@@ -1,4 +1,6 @@
-# Strace-Unix: Lightweight Debugger with System Call TracingStrace-Unix - Mini-GDB
+# Strace-Unix - Lightweight Debugger with System Call Tracing
+
+<br>
 
 ![mybadge](https://badgen.net/badge/SKILLS/%20UNIX,%20SYSCALL,%20C%20/red?scale=1.2)
 
@@ -13,9 +15,7 @@
 
 ## Usage
 
-```
-	ft_strace PROG [args]
-```
+
 
 To use it open your terminal and run these commands:
 
@@ -45,6 +45,7 @@ To use it open your terminal and run these commands:
 
 ## About
 
+<br>
 
 This program observes a running process and lists each
 [system call](https://en.wikipedia.org/wiki/System_call) with the
@@ -52,6 +53,8 @@ This program observes a running process and lists each
 actually is a system call too). After having seized a process it will use the
 [waitpid()](https://man7.org/linux/man-pages/man2/wait4.2.html) system call to
 wait for events.
+
+<br>
 
 ## What is a system call
 
@@ -87,7 +90,9 @@ about it. However it is important to keep in mind when dealing with different
 architectures in a low level setting. This one of the reason that ft\_strace
 only works on the x86\_64 architecture.
 
-### How to catch a system call ?
+<br>
+
+## How to catch a system call ?
 
 With _ptrace()_. But first you have to *seize* the running process you want to
 observe. For that one simply has to use the *PTRACE_SEIZE* request on the pid of
