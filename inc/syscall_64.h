@@ -21,7 +21,7 @@
 		[13] = {"rt_sigaction", 3, {INT, STRUCT_SIGACT, STRUCT_SIGACT, 0, 0, 0}, INT},                     \
 		[14] = {"rt_sigprocmask", 4, {INT, STRUCT_SIGSET, STRUCT_SIGSET, 0, 0, 0}, INT},                   \
 		[15] = {"rt_sigreturn", 0, {0, 0, 0, 0, 0, 0}, INT},                                               \
-		[16] = {"ioctl", 3, {INT, ULONG, 0, 0, 0, 0}, INT},                                                \
+		[16] = {"ioctl", 2, {INT, ULONG, 0, 0, 0, 0}, INT},                                                \
 		[17] = {"pread64", 4, {INT, STR, ULONG, OFF, 0, 0}, ULONG},                                        \
 		[18] = {"pwrite64", 4, {INT, STR, ULONG, OFF, 0, 0}, ULONG},                                       \
 		[19] = {"readv", 3, {INT, STRUCT_IOVEC, INT, 0, 0, 0}, ULONG},                                     \

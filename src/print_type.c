@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                    :::       :::     :::   */
-/*   print_type.c                                    :+:       :+: :+: :+:    */
+/*   print_type.c                                       :+:      :+:    :+:   */
 /*                                                 +:++:+     +:+  +  +:+     */
 /*   By: amahla <ammah.connect@outlook.fr>       +#+  +:+    +#+     +#+      */
 /*                                             +#+    +#+   +#+     +#+       */
 /*   Created: 2023/11/17 18:00:59 by amahla  #+#      #+#  #+#     #+#        */
-/*   Updated: 2023/11/25 22:57:42 by amahla ###       ########     ########   */
+/*   Updated: 2023/11/27 14:34:30 by amahla           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,17 @@ static uint32_t	print_str(pid_t child, unsigned long long int value)
 		while ((isprint(*buffer) && buffer[i] && i < size)
 			|| (*buffer && !isprint(*buffer) && i < size)
 		) {
-			if (isprint(buffer[i]))
+			if (buffer[i] == '\r')
+				ret += dprintf(2, "\\r");
+			else if (buffer[i] == '\n')
+				ret += dprintf(2, "\\n");
+			else if (buffer[i] == '\t')
+				ret += dprintf(2, "\\t");
+			else if (buffer[i] == '\f')
+				ret += dprintf(2, "\\f");
+			else if (buffer[i] == '\v')
+				ret += dprintf(2, "\\v");
+			else if (isprint(buffer[i]))
 				ret += dprintf(2, "%c", buffer[i]);
 			else
 				ret += dprintf(2, "\\%hho", buffer[i]);

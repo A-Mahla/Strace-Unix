@@ -1,4 +1,4 @@
-FROM	amd64/ubuntu:latest
+FROM	amd64/ubuntu:jammy
 
 RUN	apt-get update && apt-get install -y \
 	gcc \
